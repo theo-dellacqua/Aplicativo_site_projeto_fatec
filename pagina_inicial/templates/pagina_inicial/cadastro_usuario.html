@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="pb-4">
+    <div class="border rounded-5">
+        <section class="w-100 p-4 d-flex justify-content-center pb-4">
+            <form style="width: 22rem;" method="post">
+                <h2 class="my-5">Cadastro</h2>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <ul class="list-unstyled text-danger">
+                    {% for erro in form.non_field_errors %}
+                    <li>{{ erro }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% for field in form %}
+                <div data-mdb-input-init class="form-outline mb-4">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for erro in field.errors %}
+                    <small class="text-danger">{{ erro }}</small>
+                    {% endfor %}
+                    {% if field.help_text %}
+                    <div class="form-text">
+                        <i>{{ field.help_text }}</i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Submit button -->
+                <button type="submit" data-mdb-button-init data-mdb-ripple-init
+                    class="btn btn-primary btn-block mb-4">Cadastrar</button>
+
+                <!-- Register buttons -->
+                <div class="text-center">
+                    <p>Já tem Login? <a href="/accounts/login/">Entrar</a></p>
+                </div>
+            </form>
+        </section>
+    </div>
+</section>
+{% endblock %}

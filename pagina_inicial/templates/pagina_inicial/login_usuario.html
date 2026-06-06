@@ -1,0 +1,39 @@
+<!-- Codigo do Login -->
+{% extends "base.html" %}
+{% block content %}
+<section class="pb-4">
+    <div class="border rounded-5">
+        <section class="w-100 p-4 d-flex justify-content-center pb-4">
+            <form style="width: 22rem;" method="post">
+                <h2 class="my-5">Login</h2>
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div data-mdb-input-init class="form-outline mb-4">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
+
+                {% if form.non_field_errors %}
+                <ul class="list-unstyled text-danger">
+                    {% for erro in form.non_field_errors %}
+                    <li>{{ erro }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                <!-- Submit button -->
+                <button type="submit" data-mdb-button-init data-mdb-ripple-init
+                    class="btn btn-primary btn-block mb-4">Entrar</button>
+
+                <!-- Register buttons -->
+                <div class="text-center">
+                    <p>Não tem Login, <a href="/cadastro">Cadastre-se</a></p>
+                </div>
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
+        </section>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .hero {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        padding: 60px 30px;
+        text-align: center;
+        border-radius: 8px;
+        margin-bottom: 40px;
+    }
+
+    .hero h1 {
+        font-size: 2.8rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .section {
+        background: #ffffff;
+        padding: 25px 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        color: #1e3c72;
+    }
+
+    .section p {
+        text-align: justify;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .container-main {
+        max-width: 900px;
+        margin: auto;
+    }
+</style>
+
+<div class="container-main">
+
+    <div class="hero">
+        <h1>Projeto Integrador V — FATEC Ipiranga</h1>
+        <p>Big Data para Negócios • Análises • Machine Learning • Dashboards • Website</p>
+    </div>
+
+    <div class="section">
+        <h2>Sobre o Projeto</h2>
+        <p>
+            Este trabalho acadêmico, sob a disciplina do Projeto Integrador do curso de Big Data para Negócios
+            da FATEC Ipiranga, tem como finalidade principal a análise de um caso da empresa EGA Soluções
+            Industriais, que produz softwares de controle de chão de fábrica (MES). Nesse projeto, o grupo lançou mão
+            de ferramentas de Big Data, incluindo Cálculos Estatísticos, Inteligência Artificial, Modelagem de Dados,
+            Dashboards e criação de um website.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Sobre a Empresa</h2>
+        <p>
+            A EGA Soluções Industriais é uma empresa brasileira fundada em 1988, que atua há mais de três décadas no
+            desenvolvimento de soluções tecnológicas voltadas para a gestão da produção industrial. Com sede no Brasil
+            e capital 100% nacional, a empresa se consolidou como uma fornecedora de sistemas MES (Manufacturing Execution System),
+            ferramentas fundamentais para o monitoramento e controle em tempo real das operações de manufatura. Seu foco é oferecer
+            soluções completas que integram hardware e software, possibilitando às indústrias maior eficiência operacional,
+            redução de desperdícios e aumento da produtividade, alinhando-se às demandas da chamada Indústria 4.0.
+        </p>
+        <p>
+            O portfólio da EGA abrange funcionalidades que permitem acompanhar o desempenho das máquinas e processos, 
+            calcular indicadores como OEE (Eficiência Global dos Equipamentos), gerenciar a qualidade dos produtos, realizar rastreabilidade, 
+            controlar inventários e até mesmo monitorar o consumo de energia.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Sobre o Site</h2>
+        <p>
+            O website foi desenvolvido utilizando Python e Django. Nele, é possível realizar cadastro e login, caso o usuário
+            já possua uma conta. No cadastro, é necessário informar nome de usuário, nome, sobrenome, e-mail, senha e confirmação de senha. 
+            Para realizar o login, o usuário deve fornecer o nome de usuário e a senha.
+        </p>
+        <p>
+            O sistema realiza diversas validações durante o cadastro, verificando, por exemplo, se nenhum campo foi deixado em branco, 
+            se o nome de usuário ainda não existe no sistema e se o e-mail está no formato correto (contendo “@” e “.”). Para cada verificação, 
+            o site exibe uma mensagem específica na própria guia do campo correspondente — seja no nome, sobrenome, e-mail, senha ou confirmação 
+            de senha — orientando o usuário sobre o que precisa ser corrigido. No login, caso o usuário informe um nome de usuário ou senha incorretos, 
+            também é exibida uma mensagem orientando sobre o erro. Além disso, o site oferece a opção de logout(sair), permitindo que o 
+            usuário saia da conta atual caso deseje trocar de usuário ou simplesmente encerrar sua sessão.
+        </p>
+        <p>
+            O site permite acessar as análises de Machine Learning desenvolvidas no projeto. Ele está conectado ao banco de dados, portanto, 
+            qualquer modificação no banco afeta diretamente as análises disponíveis. Também é possível visualizar os Dashboards criados no Power BI, 
+            que estão integrados ao website, alterações feitas no Power BI são refletidas automaticamente no site.
+        </p>
+        <p>
+            Para acessar as análises de Machine Learning ou os Dashboards, é necessário ter uma conta e estar logado, garantindo maior segurança. 
+            O site conta ainda com uma página administrativa, acessível apenas por contas autorizadas, onde é possível visualizar o banco de dados 
+            e a lista de usuários cadastrados.
+        </p>
+        <p>
+            O website está hospedado no Vercel, o que permite que qualquer pessoa possa acessá-lo por meio do link disponibilizado.
+        </p>
+    </div>
+
+</div>
+
+{% endblock %}

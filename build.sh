@@ -4,7 +4,6 @@ echo "**********     início     **********"
  
  
 echo "**********  pip install   **********"
-python3 -m pip install -r requirements.txt
  
 echo "********** makemigrations **********"
 python3 manage.py makemigrations --noinput

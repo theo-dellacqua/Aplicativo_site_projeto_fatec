@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Gráfico de Machine Learning usando Modelo Arima — OEE</h2>
 
-<p><strong>Última execução:</strong> {{ ultima_data }}</p>
-<p><strong>Próxima execução prevista:</strong> {{ data_prevista }}</p>
-<p><strong>OEE previsto:</strong> {{ oee_previsto }}%</p>
+<h2>OEE de execuções do produto por máquina - Produto 2 - Últimas 5 execuções</h2>
 
-<img src="data:image/png;base64,{{ grafico }}" style="width:90%; border:1px solid #ccc; margin-top:20px;">
+<img src="data:image/png;base64,{{ grafico }}"
+     style="width:90%; border:1px solid #ccc; margin-top:20px;">
+
 {% endblock %}

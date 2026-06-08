@@ -26,6 +26,8 @@ def grafico_1(request):
 
     df["inicio"] = pd.to_datetime(df["inicio"])
 
+    df["inicio"] = (df["inicio"].dt.tz_convert("America/Sao_Paulo"))
+
     df["OEE_MAQUINA"] = (df["maquina"].astype(str) + " - " + df["inicio"].dt.strftime('%d/%m %H:%M'))
 
     grafico_agg = (df.groupby("OEE_MAQUINA", as_index=False).agg(OEE_MAX=("oee", "mean")))

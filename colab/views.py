@@ -67,81 +67,49 @@ def grafico_1(request):
 
 @login_required
 def grafico_2(request):
-    
-    #Carregar dados
-    query = """
-        SELECT registro, produto, maquina, teep
-        FROM colab_ega_kpis_prod
-        WHERE produto = 2027 AND maquina = 23
-        ORDER BY registro
-    """
 
-    df = pd.read_sql(query, connections['default'])
-    df["registro"] = pd.to_datetime(df["registro"])
+    produto_filtro = 19
 
-    #Calcular INTERVALO entre execuções
-    df["intervalo"] = df["registro"].diff().dt.days
-    intervalos = df["intervalo"].dropna()
+    queryset = (OEE_Prod_260521.objects.filter(produto=produto_filtro))
 
-    #Criar eixo X como números sequenciais
-    x_int = np.arange(len(intervalos))
-    y_int = intervalos.values
+    dados = list(queryset.values('maquina','oee'))
 
-    #REGRASSÃO LINEAR SIMPLES para prever intervalo
-    coef = np.polyfit(x_int, y_int, 1)
-    a, b = coef
+    df = pd.DataFrame(dados)
 
-    proximo_intervalo = a * (len(intervalos)) + b
+    if df.empty:
+        return render(request, "colab/grafico_2.html", {
+            "grafico": None
+        })
 
-    #Calcular data prevista
-    ultima_data = df["registro"].max()
-    data_prevista = ultima_data + pd.Timedelta(days=float(proximo_intervalo))
+    oee_maquina = (df.groupby("maquina")["oee"].mean().reset_index().sort_values(by="oee", ascending=False))
 
-    #Previsão do TEEP usando regressão linear simples
-    serie_teep = df.set_index("registro")["teep"]
-
-    x_teep = np.arange(len(serie_teep))
-    y_teep = serie_teep.values
-
-    coef_teep = np.polyfit(x_teep, y_teep, 1)
-    a2, b2 = coef_teep
-
-    teep_previsto = a2 * len(serie_teep) + b2
-
-    #Criar gráfico
     plt.figure(figsize=(12, 6))
-    plt.plot(serie_teep.index, serie_teep, label="TEEP", color="green")
 
-    # ponto previsto
-    plt.scatter([data_prevista], [teep_previsto], color="red", s=120, label="Previsão do TEEP")
+    sns.barplot(data=oee_maquina,x="maquina",y="oee",color="#2e8b57")
 
-    # linha tracejada até previsão
-    plt.plot(
-        [serie_teep.index[-1], data_prevista],
-        [serie_teep.iloc[-1], teep_previsto],
-        linestyle="--",
-        color="gray"
-    )
+    plt.title(f"OEE Produto {produto_filtro} por Máquina",fontsize=16)
+    plt.xlabel("Máquina")
+    plt.ylabel("OEE (%)")
+    plt.xticks(rotation=45)
+    plt.ylim(0,float(oee_maquina["oee"].max()) + 10)
 
-    plt.title("Previsão do TEEP do Produto 2027 na Máquina 23 na próxima execução")
-    plt.xlabel("Data")
-    plt.ylabel("TEEP (%)")
-    plt.grid(True)
-    plt.legend()
+    for index, row in oee_maquina.iterrows():
+
+        plt.text(index,float(row["oee"]) + 1,f'{float(row["oee"]):.1f}%',ha='center')
 
     buffer = io.BytesIO()
+
     plt.tight_layout()
     plt.savefig(buffer, format='png')
     plt.close()
+
     buffer.seek(0)
+
     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
-    return render(request, "colab/grafico_2.html", {
-        "grafico": grafico_png,
-        "data_prevista": data_prevista,
-        "teep_previsto": round(float(teep_previsto), 2),
-        "ultima_data": ultima_data
-    })
+    return render(request,"colab/grafico_2.html",{"grafico": grafico_png})
+
+
 
 
 @login_required

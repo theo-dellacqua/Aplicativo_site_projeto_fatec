@@ -133,30 +133,30 @@ def grafico_3(request):
 
     queryset = (ITENS_260521.objects.exclude(pecas_hora__isnull=True).exclude(inicio__isnull=True))
 
-    dados = list(queryset.values('inicio','pecas_hora'))
+    dados = list(queryset.values('inicio', 'pecas_hora'))
 
     df = pd.DataFrame(dados)
 
     if df.empty:
-        return render(request,"colab/grafico_3.html",{"grafico": None})
+        return render(request, "colab/grafico_3.html", {"grafico": None})
 
     df["inicio"] = pd.to_datetime(df["inicio"])
-
-    df["pecas_hora"] = pd.to_numeric(df["pecas_hora"],errors="coerce")
+    df["pecas_hora"] = pd.to_numeric(df["pecas_hora"], errors="coerce")
 
     df = df.dropna(subset=["inicio", "pecas_hora"])
 
     media_pecas_hora = df["pecas_hora"].mean()
 
-    inicio = pd.to_datetime('21/05/2026 10:59',dayfirst=True)
+    data_inicio = request.GET.get("data_inicio", "2026-05-21T10:59")
+    quantidade = int(request.GET.get("quantidade", 20000))
 
-    quantidade = 20000
+    inicio = pd.to_datetime(data_inicio)
 
     oee = 66.66
 
     tempo_ideal_horas = quantidade / media_pecas_hora
 
-    tempo_real_horas = (tempo_ideal_horas /(oee / 100))
+    tempo_real_horas = tempo_ideal_horas / (oee / 100)
 
     fim_previsto = inicio + pd.to_timedelta(tempo_real_horas,unit='h')
 
@@ -164,13 +164,12 @@ def grafico_3(request):
 
     ax.plot([inicio, fim_previsto],[0, 0],linewidth=12)
 
-    ax.scatter(inicio,0,s=350)
+    ax.scatter(inicio, 0, s=350)
+    ax.scatter(fim_previsto, 0, s=350)
 
-    ax.scatter(fim_previsto,0,s=350)
+    ax.text(inicio,0.05,'INÍCIO\n' + inicio.strftime('%d/%m/%Y %H:%M'),fontsize=11)
 
-    ax.text(inicio,0.05,'INÍCIO\n' +inicio.strftime('%d/%m/%Y %H:%M'),fontsize=11)
-
-    ax.text(fim_previsto,0.05,'PREVISÃO FINAL\n' +fim_previsto.strftime('%d/%m/%Y %H:%M'),fontsize=11,ha='right')
+    ax.text(fim_previsto,0.05,'PREVISÃO FINAL\n' + fim_previsto.strftime('%d/%m/%Y %H:%M'),fontsize=11,ha='right')
 
     meio = inicio + ((fim_previsto - inicio) / 2)
 
@@ -181,29 +180,28 @@ def grafico_3(request):
         f'Tempo Previsto: {tempo_real_horas:.2f} horas'
     )
 
-    ax.text(meio,-0.05,texto,fontsize=12,ha='center',bbox=dict(boxstyle='round',pad=0.5))
+    ax.text(meio,-0.05,texto,fontsize=12,ha='center',bbox=dict(boxstyle='round', pad=0.5))
 
     ax.set_yticks([])
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m %H:%M'))
 
     plt.xticks(rotation=20)
-    plt.title('Previsão de produção')
+    plt.title('Previsão de Produção')
     plt.xlabel('Data')
     plt.grid(True)
 
     buffer = io.BytesIO()
 
     plt.tight_layout()
-    plt.savefig(buffer,format='png')
+    plt.savefig(buffer, format='png')
     plt.close()
 
     buffer.seek(0)
 
     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
-    return render(request,"colab/grafico_3.html",{"grafico": grafico_png,"media_pecas_hora": round(float(media_pecas_hora), 2),"tempo_ideal": round(float(tempo_ideal_horas), 2),"tempo_real": round(float(tempo_real_horas), 2),"fim_previsto": fim_previsto})
-
+    return render(request,"colab/grafico_3.html",{"grafico": grafico_png,"media_pecas_hora": round(float(media_pecas_hora), 2),"tempo_ideal": round(float(tempo_ideal_horas), 2),"tempo_real": round(float(tempo_real_horas), 2),"fim_previsto": fim_previsto,"data_inicio": data_inicio,"quantidade": quantidade})
 
 
 

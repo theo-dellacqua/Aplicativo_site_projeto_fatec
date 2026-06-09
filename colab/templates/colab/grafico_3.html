@@ -4,6 +4,30 @@
 
 <h2>Previsão de Produção</h2>
 
+<form method="get"
+      style="text-align:right; margin-bottom:20px;">
+
+    <label><strong>Data Inicial:</strong></label>
+
+    <input type="datetime-local"
+           name="data_inicio"
+           value="{{ data_inicio }}">
+
+    <label style="margin-left:20px;">
+        <strong>Quantidade:</strong>
+    </label>
+
+    <input type="number"
+           name="quantidade"
+           value="{{ quantidade }}"
+           min="1">
+
+    <button type="submit">
+        Simular
+    </button>
+
+</form>
+
 <p><strong>Média Peças/Hora:</strong> {{ media_pecas_hora }}</p>
 
 <p><strong>Tempo ideal:</strong> {{ tempo_ideal }} horas</p>

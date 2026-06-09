@@ -3,114 +3,159 @@
 {% block content %}
 
 <style>
+
+    body{
+        background: #f4f7fb;
+    }
+
+    .container-main {
+        max-width: 1000px;
+        margin: auto;
+    }
+
     .hero {
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        background: linear-gradient(
+            135deg,
+            #0f2027,
+            #203a43,
+            #2e8b57
+        );
+
         color: white;
-        padding: 60px 30px;
+        padding: 80px 40px;
         text-align: center;
-        border-radius: 8px;
+        border-radius: 20px;
         margin-bottom: 40px;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,0.20);
     }
 
     .hero h1 {
-        font-size: 2.8rem;
-        margin-bottom: 10px;
+        font-size: 3rem;
+        margin-bottom: 15px;
         font-weight: 700;
+        letter-spacing: 1px;
     }
 
     .hero p {
         font-size: 1.2rem;
-        opacity: 0.9;
+        opacity: 0.95;
+        margin: 0;
     }
 
     .section {
-        background: #ffffff;
-        padding: 25px 30px;
-        border-radius: 8px;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+        background: white;
+
+        padding: 30px;
+
+        border-radius: 16px;
+
+        margin-bottom: 25px;
+
+        border-left: 6px solid #2e8b57;
+
+        box-shadow:
+            0 4px 15px rgba(0,0,0,0.08);
+
+        transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    .section:hover {
+
+        transform: translateY(-4px);
+
+        box-shadow:
+            0 8px 25px rgba(0,0,0,0.12);
     }
 
     .section h2 {
+
+        color: #1f6b44;
+
+        margin-bottom: 18px;
+
         font-size: 1.8rem;
-        margin-bottom: 15px;
-        color: #1e3c72;
+
+        font-weight: 700;
     }
 
     .section p {
+
         text-align: justify;
+
+        line-height: 1.8;
+
         font-size: 1rem;
-        line-height: 1.6;
+
+        color: #374151;
     }
 
-    .container-main {
-        max-width: 900px;
-        margin: auto;
-    }
 </style>
 
 <div class="container-main">
 
     <div class="hero">
-        <h1>Projeto Integrador V — FATEC Ipiranga</h1>
-        <p>Big Data para Negócios • Análises • Machine Learning • Dashboards • Website</p>
+        <h1>Projeto Integrador VI</h1>
+
+        <p>
+            Big Data para Negócios • Machine Learning • Business Intelligence • Desenvolvimento Mobile
+        </p>
     </div>
 
     <div class="section">
         <h2>Sobre o Projeto</h2>
+
         <p>
-            Este trabalho acadêmico, sob a disciplina do Projeto Integrador do curso de Big Data para Negócios
-            da FATEC Ipiranga, tem como finalidade principal a análise de um caso da empresa EGA Soluções
-            Industriais, que produz softwares de controle de chão de fábrica (MES). Nesse projeto, o grupo lançou mão
-            de ferramentas de Big Data, incluindo Cálculos Estatísticos, Inteligência Artificial, Modelagem de Dados,
-            Dashboards e criação de um website.
+            Este trabalho acadêmico, desenvolvido na disciplina de Projeto Integrador do curso de Big Data para Negócios da FATEC Ipiranga, tem como objetivo a análise de um caso real da empresa EGA Soluções Industriais, especializada no desenvolvimento de softwares para controle de chão de fábrica (MES).
+        </p>
+
+        <p>
+            O projeto utiliza técnicas de Big Data, Estatística, Inteligência Artificial, Modelagem de Dados, Machine Learning, Dashboards e Desenvolvimento Mobile, transformando dados industriais em informações estratégicas para apoio à tomada de decisão.
         </p>
     </div>
 
     <div class="section">
         <h2>Sobre a Empresa</h2>
+
         <p>
-            A EGA Soluções Industriais é uma empresa brasileira fundada em 1988, que atua há mais de três décadas no
-            desenvolvimento de soluções tecnológicas voltadas para a gestão da produção industrial. Com sede no Brasil
-            e capital 100% nacional, a empresa se consolidou como uma fornecedora de sistemas MES (Manufacturing Execution System),
-            ferramentas fundamentais para o monitoramento e controle em tempo real das operações de manufatura. Seu foco é oferecer
-            soluções completas que integram hardware e software, possibilitando às indústrias maior eficiência operacional,
-            redução de desperdícios e aumento da produtividade, alinhando-se às demandas da chamada Indústria 4.0.
+            A EGA Soluções Industriais é uma empresa brasileira fundada em 1988 e atua há mais de três décadas no desenvolvimento de tecnologias para monitoramento e gestão da produção industrial.
         </p>
+
         <p>
-            O portfólio da EGA abrange funcionalidades que permitem acompanhar o desempenho das máquinas e processos, 
-            calcular indicadores como OEE (Eficiência Global dos Equipamentos), gerenciar a qualidade dos produtos, realizar rastreabilidade, 
-            controlar inventários e até mesmo monitorar o consumo de energia.
+            Seu principal foco está nos sistemas MES (Manufacturing Execution System), que permitem acompanhar em tempo real o desempenho das operações produtivas, promovendo maior controle, eficiência e produtividade.
+        </p>
+
+        <p>
+            Entre as funcionalidades oferecidas estão o monitoramento de máquinas, cálculo de indicadores industriais, rastreabilidade de produção, gestão da qualidade, controle de inventário e acompanhamento do consumo de energia, contribuindo diretamente para iniciativas de Indústria 4.0.
         </p>
     </div>
 
     <div class="section">
-        <h2>Sobre o Site</h2>
+        <h2>Sobre o Aplicativo</h2>
+
         <p>
-            O website foi desenvolvido utilizando Python e Django. Nele, é possível realizar cadastro e login, caso o usuário
-            já possua uma conta. No cadastro, é necessário informar nome de usuário, nome, sobrenome, e-mail, senha e confirmação de senha. 
-            Para realizar o login, o usuário deve fornecer o nome de usuário e a senha.
+            Antes do desenvolvimento da aplicação Mobile, foi criado inicialmente um sistema Web utilizando as tecnologias Python e Django. Posteriormente, o projeto foi adaptado e transformado em aplicativo Mobile com auxílio do software Android Studio, permitindo maior mobilidade e acessibilidade aos usuários do sistema.
         </p>
+
         <p>
-            O sistema realiza diversas validações durante o cadastro, verificando, por exemplo, se nenhum campo foi deixado em branco, 
-            se o nome de usuário ainda não existe no sistema e se o e-mail está no formato correto (contendo “@” e “.”). Para cada verificação, 
-            o site exibe uma mensagem específica na própria guia do campo correspondente — seja no nome, sobrenome, e-mail, senha ou confirmação 
-            de senha — orientando o usuário sobre o que precisa ser corrigido. No login, caso o usuário informe um nome de usuário ou senha incorretos, 
-            também é exibida uma mensagem orientando sobre o erro. Além disso, o site oferece a opção de logout(sair), permitindo que o 
-            usuário saia da conta atual caso deseje trocar de usuário ou simplesmente encerrar sua sessão.
+            O aplicativo pode ser instalado em dispositivos móveis por meio de um arquivo gerado durante o processo de compilação da aplicação. Após a instalação, o usuário passa a ter acesso às funcionalidades desenvolvidas no projeto, incluindo dashboards, gráficos históricos e análises de Machine Learning.
         </p>
+
         <p>
-            O site permite acessar as análises de Machine Learning desenvolvidas no projeto. Ele está conectado ao banco de dados, portanto, 
-            qualquer modificação no banco afeta diretamente as análises disponíveis. Também é possível visualizar os Dashboards criados no Power BI, 
-            que estão integrados ao website, alterações feitas no Power BI são refletidas automaticamente no site.
+            A aplicação possui sistema de cadastro e autenticação de usuários. Durante o processo de cadastro, o usuário deve informar dados como nome de usuário, nome, sobrenome, e-mail, senha e confirmação de senha. Já para acessar o sistema, é necessário realizar login utilizando nome de usuário e senha cadastrados previamente.
+
         </p>
+
         <p>
-            Para acessar as análises de Machine Learning ou os Dashboards, é necessário ter uma conta e estar logado, garantindo maior segurança. 
-            O site conta ainda com uma página administrativa, acessível apenas por contas autorizadas, onde é possível visualizar o banco de dados 
-            e a lista de usuários cadastrados.
+            O aplicativo está integrado ao banco de dados, permitindo atualização dinâmica das informações apresentadas nos dashboards e análises. Dessa forma, qualquer alteração realizada no banco de dados impacta diretamente os resultados analíticos disponibilizados pela aplicação.
         </p>
+
         <p>
-            O website está hospedado no Vercel, o que permite que qualquer pessoa possa acessá-lo por meio do link disponibilizado.
+            Além disso, o sistema implementa mecanismos básicos de segurança e autenticação, garantindo que apenas usuários cadastrados e autenticados possam acessar os gráficos históricos e a análise de Machine Learning. Essa abordagem contribui para maior proteção das informações e controle de acesso aos dados industriais utilizados no projeto.
         </p>
     </div>
 

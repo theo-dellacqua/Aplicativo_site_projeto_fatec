@@ -76,11 +76,17 @@ def grafico_1(request):
 
 
 
-
 @login_required
 def grafico_2(request):
 
-    produto_filtro = 19
+    produtos = (OEE_Prod_260521.objects.values_list('produto', flat=True).distinct().order_by('produto'))
+
+    produto_filtro = request.GET.get("produto")
+
+    if produto_filtro:
+        produto_filtro = int(produto_filtro)
+    else:
+        produto_filtro = produtos.first()
 
     queryset = (OEE_Prod_260521.objects.filter(produto=produto_filtro))
 
@@ -89,9 +95,7 @@ def grafico_2(request):
     df = pd.DataFrame(dados)
 
     if df.empty:
-        return render(request, "colab/grafico_2.html", {
-            "grafico": None
-        })
+        return render(request,"colab/grafico_2.html",{"grafico": None,"produtos": produtos,"produto_selecionado": produto_filtro})
 
     oee_maquina = (df.groupby("maquina")["oee"].mean().reset_index().sort_values(by="oee", ascending=False))
 
@@ -119,7 +123,8 @@ def grafico_2(request):
 
     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
-    return render(request,"colab/grafico_2.html",{"grafico": grafico_png})
+    return render(request,"colab/grafico_2.html",{"grafico": grafico_png,"produtos": produtos,"produto_selecionado": produto_filtro})
+
 
 
 

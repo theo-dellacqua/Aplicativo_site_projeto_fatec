@@ -2,9 +2,45 @@
 
 {% block content %}
 
-<h2>OEE Médio do Produto 19 por Máquina</h2>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 
-<img src="data:image/png;base64,{{ grafico }}"
-     style="width:90%; border:1px solid #ccc; margin-top:20px;">
+    <h2>OEE Médio por Máquina</h2>
+
+    <form method="GET">
+
+        <label><strong>Produto:</strong></label>
+
+        <select name="produto" onchange="this.form.submit()">
+
+            {% for produto in produtos %}
+
+                <option value="{{ produto }}"
+                    {% if produto == produto_selecionado %}
+                        selected
+                    {% endif %}
+                >
+                    {{ produto }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </form>
+
+</div>
+
+{% if grafico %}
+
+    <img
+        src="data:image/png;base64,{{ grafico }}"
+        style="width:90%; border:1px solid #ccc; margin-top:20px;"
+    >
+
+{% else %}
+
+    <p>Nenhum dado encontrado para este produto.</p>
+
+{% endif %}
 
 {% endblock %}

@@ -11,9 +11,18 @@ from colab.models import OEE_Prod_260521
 from colab.models import ITENS_260521
 import matplotlib.dates as mdates
 
+
 @login_required
 def grafico_1(request):
-    produto_selecionado = 2
+
+    produtos = (OEE_Prod_260521.objects.values_list('produto', flat=True).distinct().order_by('produto'))
+
+    produto_selecionado = request.GET.get("produto")
+
+    if produto_selecionado:
+        produto_selecionado = int(produto_selecionado)
+    else:
+        produto_selecionado = produtos.first()
 
     queryset = (OEE_Prod_260521.objects.filter(produto=produto_selecionado).order_by('-inicio')[:5])
 
@@ -22,9 +31,7 @@ def grafico_1(request):
     df = pd.DataFrame(dados)
 
     if df.empty:
-        return render(request, "colab/grafico_1.html", {
-            "grafico": None
-        })
+        return render(request,"colab/grafico_1.html",{"grafico": None,"produtos": produtos,"produto_selecionado": produto_selecionado})
 
     df["inicio"] = pd.to_datetime(df["inicio"])
 
@@ -32,7 +39,7 @@ def grafico_1(request):
 
     df["OEE_MAQUINA"] = (df["maquina"].astype(str) + " - " + df["inicio"].dt.strftime('%d/%m %H:%M'))
 
-    grafico_agg = (df.groupby("OEE_MAQUINA", as_index=False).agg(OEE_MAX=("oee", "mean")))
+    grafico_agg = (df.groupby("OEE_MAQUINA",as_index=False).agg(OEE_MAX=("oee", "mean")))
 
     grafico_agg = grafico_agg.sort_values("OEE_MAQUINA")
 
@@ -43,27 +50,30 @@ def grafico_1(request):
     plt.title(f'OEE de execuções do produto por máquina - Produto {produto_selecionado}')
     plt.xlabel('Máquina / Execução')
     plt.ylabel('OEE')
-    plt.xticks(rotation=45, ha='right')
+    plt.xticks(rotation=45,ha='right')
     plt.ylim(0,float(grafico_agg["OEE_MAX"].max()) * 1.15)
 
     for barra in barras:
+
         altura = barra.get_height()
 
         plt.text(barra.get_x() + barra.get_width()/2,altura,f'{altura:.2f}',ha='center',va='bottom')
 
-    plt.grid(axis='y', linestyle='--', alpha=0.3)
+    plt.grid(axis='y',linestyle='--',alpha=0.3)
 
     buffer = io.BytesIO()
 
     plt.tight_layout()
-    plt.savefig(buffer, format='png')
+
+    plt.savefig(buffer,format='png')
     plt.close()
 
     buffer.seek(0)
 
     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
-    return render(request, "colab/grafico_1.html", {"grafico": grafico_png})
+    return render(request,"colab/grafico_1.html",{"grafico": grafico_png,"produtos": produtos,"produto_selecionado": produto_selecionado})
+
 
 
 

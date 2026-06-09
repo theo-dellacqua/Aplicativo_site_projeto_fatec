@@ -128,6 +128,7 @@ def grafico_2(request):
 
 
 
+
 @login_required
 def grafico_3(request):
 

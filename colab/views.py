@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 from django.db import connections
 from colab.models import OEE_Prod_260521
+from colab.models import ITENS_260521
+import matplotlib.dates as mdates
 
 @login_required
 def grafico_1(request):
@@ -111,84 +113,82 @@ def grafico_2(request):
 
 
 
-
 @login_required
 def grafico_3(request):
-    
-    # Carregar dados
-    query = """
-        SELECT registro, produto, maquina, qualidade
-        FROM colab_ega_kpis_prod
-        WHERE produto = 2027 AND maquina = 23
-        ORDER BY registro
-    """
 
-    df = pd.read_sql(query, connections['default'])
-    df["registro"] = pd.to_datetime(df["registro"])
+    queryset = (ITENS_260521.objects.exclude(pecas_hora__isnull=True).exclude(inicio__isnull=True))
 
-    # Calcular INTERVALO entre execuções
-    df["intervalo"] = df["registro"].diff().dt.days
-    intervalos = df["intervalo"].dropna()
+    dados = list(queryset.values('inicio','pecas_hora'))
 
-    # Criar eixo X de números sequenciais
-    x_int = np.arange(len(intervalos))
-    y_int = intervalos.values
+    df = pd.DataFrame(dados)
 
-    # Regressão Linear p/ prever intervalo
-    coef = np.polyfit(x_int, y_int, 1)
-    a, b = coef
+    if df.empty:
+        return render(request,"colab/grafico_3.html",{"grafico": None})
 
-    proximo_intervalo = a * (len(intervalos)) + b
+    df["inicio"] = pd.to_datetime(df["inicio"])
 
-    # Calcular a data prevista
-    ultima_data = df["registro"].max()
-    data_prevista = ultima_data + pd.Timedelta(days=float(proximo_intervalo))
+    df["pecas_hora"] = pd.to_numeric(df["pecas_hora"],errors="coerce")
 
-    # Previsão da QUALIDADE
-    serie_qual = df.set_index("registro")["qualidade"]
+    df = df.dropna(subset=["inicio", "pecas_hora"])
 
-    x_q = np.arange(len(serie_qual))
-    y_q = serie_qual.values
+    media_pecas_hora = df["pecas_hora"].mean()
 
-    coef_q = np.polyfit(x_q, y_q, 1)
-    a2, b2 = coef_q
+    inicio = pd.to_datetime('21/05/2026 10:59',dayfirst=True)
 
-    qualidade_prevista = a2 * len(serie_qual) + b2
+    quantidade = 20000
 
-    # Criar gráfico
-    plt.figure(figsize=(12, 6))
-    plt.plot(serie_qual.index, serie_qual, label="Qualidade", color="orange")
+    oee = 66.66
 
-    # ponto previsto
-    plt.scatter([data_prevista], [qualidade_prevista], color="red", s=120, label="Previsão da Qualidade")
+    tempo_ideal_horas = quantidade / media_pecas_hora
 
-    # linha tracejada até previsão
-    plt.plot(
-        [serie_qual.index[-1], data_prevista],
-        [serie_qual.iloc[-1], qualidade_prevista],
-        linestyle="--",
-        color="gray"
+    tempo_real_horas = (tempo_ideal_horas /(oee / 100))
+
+    fim_previsto = inicio + pd.to_timedelta(tempo_real_horas,unit='h')
+
+    fig, ax = plt.subplots(figsize=(15, 4))
+
+    ax.plot([inicio, fim_previsto],[0, 0],linewidth=12)
+
+    ax.scatter(inicio,0,s=350)
+
+    ax.scatter(fim_previsto,0,s=350)
+
+    ax.text(inicio,0.05,'INÍCIO\n' +inicio.strftime('%d/%m/%Y %H:%M'),fontsize=11)
+
+    ax.text(fim_previsto,0.05,'PREVISÃO FINAL\n' +fim_previsto.strftime('%d/%m/%Y %H:%M'),fontsize=11,ha='right')
+
+    meio = inicio + ((fim_previsto - inicio) / 2)
+
+    texto = (
+        f'Quantidade: {quantidade} peças\n'
+        f'Média Peças/Hora: {media_pecas_hora:.2f}\n'
+        f'OEE: {oee}%\n'
+        f'Tempo Previsto: {tempo_real_horas:.2f} horas'
     )
 
-    plt.title("Previsão da Qualidade do Produto 2027 na Máquina 23 na próxima execução")
-    plt.xlabel("Data")
-    plt.ylabel("Qualidade (%)")
+    ax.text(meio,-0.05,texto,fontsize=12,ha='center',bbox=dict(boxstyle='round',pad=0.5))
+
+    ax.set_yticks([])
+
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m %H:%M'))
+
+    plt.xticks(rotation=20)
+    plt.title('Previsão de produção')
+    plt.xlabel('Data')
     plt.grid(True)
-    plt.legend()
 
     buffer = io.BytesIO()
+
     plt.tight_layout()
-    plt.savefig(buffer, format='png')
+    plt.savefig(buffer,format='png')
     plt.close()
+
     buffer.seek(0)
+
     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
-    return render(request, "colab/grafico_3.html", {
-        "grafico": grafico_png,
-        "data_prevista": data_prevista,
-        "qualidade_prevista": round(float(qualidade_prevista), 2),
-        "ultima_data": ultima_data
-    })
+    return render(request,"colab/grafico_3.html",{"grafico": grafico_png,"media_pecas_hora": round(float(media_pecas_hora), 2),"tempo_ideal": round(float(tempo_ideal_horas), 2),"tempo_real": round(float(tempo_real_horas), 2),"fim_previsto": fim_previsto})
+
 
 
 

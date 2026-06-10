@@ -11,7 +11,7 @@
         <strong>Produto:</strong>
     </label>
 
-    <select name="produto">
+    <select name="produto" onchange="this.form.submit()">
 
         {% for p in produtos %}
 
@@ -30,7 +30,7 @@
         <strong>Máquina:</strong>
     </label>
 
-    <select name="maquina">
+    <select name="maquina" onchange="this.form.submit()">
 
         {% for m in maquinas %}
 
@@ -51,7 +51,8 @@
 
     <input type="datetime-local"
            name="data_inicio"
-           value="{{ data_inicio }}">
+           value="{{ data_inicio }}"
+           onchange="this.form.submit()">
 
     <label style="margin-left:20px;">
         <strong>Quantidade:</strong>

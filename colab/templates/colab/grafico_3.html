@@ -7,7 +7,47 @@
 <form method="get"
       style="text-align:right; margin-bottom:20px;">
 
-    <label><strong>Data Inicial:</strong></label>
+    <label>
+        <strong>Produto:</strong>
+    </label>
+
+    <select name="produto">
+
+        {% for p in produtos %}
+
+        <option value="{{ p }}"
+        {% if p == produto %}
+        selected
+        {% endif %}>
+            {{ p }}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <label style="margin-left:20px;">
+        <strong>Máquina:</strong>
+    </label>
+
+    <select name="maquina">
+
+        {% for m in maquinas %}
+
+        <option value="{{ m }}"
+        {% if m == maquina %}
+        selected
+        {% endif %}>
+            {{ m }}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <label style="margin-left:20px;">
+        <strong>Data Inicial:</strong>
+    </label>
 
     <input type="datetime-local"
            name="data_inicio"
@@ -28,7 +68,15 @@
 
 </form>
 
-<p><strong>Média Peças/Hora:</strong> {{ media_pecas_hora }}</p>
+{% if mensagem %}
+<p>
+    <strong>{{ mensagem }}</strong>
+</p>
+{% endif %}
+
+<p><strong>Peças/Hora:</strong> {{ pecas_hora }}</p>
+
+<p><strong>OEE Previsto:</strong> {{ oee_previsto }}%</p>
 
 <p><strong>Tempo ideal:</strong> {{ tempo_ideal }} horas</p>
 
@@ -36,7 +84,11 @@
 
 <p><strong>Fim previsto:</strong> {{ fim_previsto }}</p>
 
+{% if grafico %}
+
 <img src="data:image/png;base64,{{ grafico }}"
      style="width:90%; border:1px solid #ccc; margin-top:20px;">
+
+{% endif %}
 
 {% endblock %}

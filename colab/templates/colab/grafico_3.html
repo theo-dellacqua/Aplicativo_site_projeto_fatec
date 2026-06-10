@@ -2,10 +2,42 @@
 
 {% block content %}
 
+<style>
+
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filtros select,
+.filtros input,
+.filtros button {
+    min-width: 180px;
+}
+
+@media (max-width: 768px) {
+
+    .filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtros select,
+    .filtros input,
+    .filtros button {
+        width: 100%;
+    }
+}
+
+</style>
+
 <h2>Previsão de Produção</h2>
 
 <form method="get"
-      style="text-align:right; margin-bottom:20px;">
+      class="filtros">
 
     <label>
         <strong>Produto:</strong>

@@ -136,21 +136,39 @@ def grafico_3(request):
 
     produtos = (ITENS_260521.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
 
-    produto = int(request.GET.get("produto",list(produtos)[0]))
+    produto = request.GET.get("produto")
 
-    data_inicio = request.GET.get("data_inicio","2026-05-21T10:59")
+    data_inicio = request.GET.get("data_inicio", "")
 
-    quantidade = int(request.GET.get("quantidade",20000))
+    quantidade = request.GET.get("quantidade", "")
 
-    maquinas = (OEE_Prod_260521.objects.filter(produto=produto).exclude(maquina__isnull=True).values_list('maquina',flat=True).distinct().order_by('maquina'))
+    if not produto:
+
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": None,"maquina": None,"data_inicio": "","quantidade": ""})
+
+    produto = int(produto)
+
+    maquinas = (OEE_Prod_260521.objects.filter(produto=produto).exclude(maquina__isnull=True).values_list('maquina', flat=True).distinct().order_by('maquina'))
 
     maquinas = list(maquinas)
 
     if not maquinas:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": produto,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": ("Este produto não possui ""histórico de máquinas.")})
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": "Este produto não possui histórico de máquinas."})
 
-    maquina = int(request.GET.get("maquina",maquinas[0]))
+    maquina = request.GET.get("maquina")
+
+    if not maquina:
+
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade})
+
+    maquina = int(maquina)
+
+    if not data_inicio or not quantidade:
+
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade})
+
+    quantidade = int(quantidade)
 
     registro_produto = (ITENS_260521.objects.filter(peca=produto,pecas_hora__isnull=False).first())
 
@@ -271,16 +289,6 @@ def grafico_3(request):
             "quantidade": quantidade
         }
     )
-
-
-
-
-
-
-
-
-
-
 
 
 

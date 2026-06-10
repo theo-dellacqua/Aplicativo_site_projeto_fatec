@@ -13,6 +13,10 @@
 
     <select name="produto" onchange="this.form.submit()">
 
+        <option value="">
+            Selecione um Produto
+        </option>
+
         {% for p in produtos %}
 
         <option value="{{ p }}"
@@ -31,6 +35,10 @@
     </label>
 
     <select name="maquina" onchange="this.form.submit()">
+
+        <option value="">
+            Selecione uma Máquina
+        </option>
 
         {% for m in maquinas %}
 
@@ -75,15 +83,19 @@
 </p>
 {% endif %}
 
-<p><strong>Peças/Hora:</strong> {{ pecas_hora }}</p>
+{% if grafico %}
 
-<p><strong>OEE Previsto:</strong> {{ oee_previsto }}%</p>
+<p><strong>Peças_Hora:</strong> {{ pecas_hora }}</p>
 
-<p><strong>Tempo ideal:</strong> {{ tempo_ideal }} horas</p>
+<p><strong>Previsão do OEE:</strong> {{ oee_previsto }}%</p>
 
-<p><strong>Tempo real:</strong> {{ tempo_real }} horas</p>
+<p><strong>Duração Padrão:</strong> {{ tempo_ideal }} horas</p>
 
-<p><strong>Fim previsto:</strong> {{ fim_previsto }}</p>
+<p><strong>Duração Prevista:</strong> {{ tempo_real }} horas</p>
+
+<p><strong>Previsão da data final</strong> {{ fim_previsto }}</p>
+
+{% endif %}
 
 {% if grafico %}
 

@@ -7,24 +7,18 @@
 .filtros {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-end;
+    gap: 10px;
+    align-items: center;
     margin-bottom: 20px;
-}
-
-.filtros div {
-    display: flex;
-    flex-direction: column;
 }
 
 .filtros select,
 .filtros input {
-    min-width: 150px;
+    min-width: 142px;
 }
 
 .filtros button {
-    min-width: 100px;
-    height: 38px;
+    min-width: 90px;
 }
 
 @media (max-width: 768px) {
@@ -32,10 +26,6 @@
     .filtros {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .filtros div {
-        width: 100%;
     }
 
     .filtros select,
@@ -52,104 +42,80 @@
 <form method="get"
       class="filtros">
 
-    <div>
+    <label>
+        <strong>Produto:</strong>
+    </label>
 
-        <label>
-            <strong>Produto:</strong>
-        </label>
+    <select name="produto" onchange="this.form.submit()">
 
-        <select name="produto"
-                onchange="this.form.submit()">
+        <option value="">
+            Selecione um Produto
+        </option>
 
-            <option value="">
-                Selecione um Produto
-            </option>
+        {% for p in produtos %}
 
-            {% for p in produtos %}
+        <option value="{{ p }}"
+        {% if p == produto %}
+        selected
+        {% endif %}>
+            {{ p }}
+        </option>
 
-            <option value="{{ p }}"
-            {% if p == produto %}
-            selected
-            {% endif %}>
-                {{ p }}
-            </option>
+        {% endfor %}
 
-            {% endfor %}
+    </select>
 
-        </select>
+    <label style="margin-left:20px;">
+        <strong>Máquina:</strong>
+    </label>
 
-    </div>
+    <select name="maquina" onchange="this.form.submit()">
 
-    <div>
+        <option value="">
+            Selecione uma Máquina
+        </option>
 
-        <label>
-            <strong>Máquina:</strong>
-        </label>
+        {% for m in maquinas %}
 
-        <select name="maquina"
-                onchange="this.form.submit()">
+        <option value="{{ m }}"
+        {% if m == maquina %}
+        selected
+        {% endif %}>
+            {{ m }}
+        </option>
 
-            <option value="">
-                Selecione uma Máquina
-            </option>
+        {% endfor %}
 
-            {% for m in maquinas %}
+    </select>
 
-            <option value="{{ m }}"
-            {% if m == maquina %}
-            selected
-            {% endif %}>
-                {{ m }}
-            </option>
+    <label style="margin-left:20px;">
+        <strong>Data Inicial:</strong>
+    </label>
 
-            {% endfor %}
+    <input type="datetime-local"
+           name="data_inicio"
+           value="{{ data_inicio }}"
+           onchange="this.form.submit()">
 
-        </select>
+    <label style="margin-left:20px;">
+        <strong>Quantidade:</strong>
+    </label>
 
-    </div>
+    <input type="number"
+           name="quantidade"
+           value="{{ quantidade }}"
+           min="1">
 
-    <div>
-
-        <label>
-            <strong>Data Inicial:</strong>
-        </label>
-
-        <input type="datetime-local"
-               name="data_inicio"
-               value="{{ data_inicio }}"
-               onchange="this.form.submit()">
-
-    </div>
-
-    <div>
-
-        <label>
-            <strong>Quantidade:</strong>
-        </label>
-
-        <input type="number"
-               name="quantidade"
-               value="{{ quantidade }}"
-               min="1">
-
-    </div>
-
-    <div>
-
-        <button type="submit">
-            Simular
-        </button>
-
-    </div>
+    <button type="submit">
+        Simular
+    </button>
 
 </form>
 
 {% if mensagem %}
-
 <p>
     <strong>{{ mensagem }}</strong>
 </p>
-
 {% endif %}
 
 {% if grafico %}

@@ -12,6 +12,9 @@ from colab.models import ITENS_260521
 from colab.models import PRODUTOS_260610
 import matplotlib.dates as mdates
 from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.preprocessing import StandardScaler
+
 
 
 @login_required
@@ -133,37 +136,92 @@ def grafico_2(request):
 
 
 
+def prever_arima_simples(serie):
+
+    serie = np.array(serie, dtype=float)
+
+    if len(serie) < 3:
+        return float(serie[-1])
+
+    diff = np.diff(serie)
+
+    x = diff[:-1]
+    y = diff[1:]
+
+    denominador = np.sum(x ** 2)
+
+    if denominador == 0:
+        phi = 0
+    else:
+        phi = np.sum(x * y) / denominador
+
+    ultimo_diff = diff[-1]
+
+    previsao_diff = phi * ultimo_diff
+
+    previsao = serie[-1] + previsao_diff
+
+    return float(previsao)
+
+
+
+#
+
+
+
 @login_required
 def grafico_3(request):
 
-    produtos = (PRODUTOS_260610.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
+    produtos = (
+        PRODUTOS_260610.objects
+        .exclude(peca__isnull=True)
+        .values_list('peca', flat=True)
+        .distinct()
+        .order_by('peca')
+    )
 
     produto = request.GET.get("produto")
-
+    maquina = request.GET.get("maquina")
     operacao = request.GET.get("operacao")
-
     data_inicio = request.GET.get("data_inicio", "")
-
     quantidade = request.GET.get("quantidade", "")
+    modelo = request.GET.get("modelo", "")
 
     if not produto:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"operacoes": [],"produto": None,"maquina": None,"operacao": None,"data_inicio": "","quantidade": ""})
+        return render(
+            request,
+            "colab/grafico_3.html",
+            {
+                "grafico": None,
+                "produtos": produtos,
+                "maquinas": [],
+                "operacoes": [],
+                "produto": None,
+                "maquina": None,
+                "operacao": None,
+                "modelo": modelo,
+                "data_inicio": "",
+                "quantidade": ""
+            }
+        )
 
     produto = int(produto)
 
     base_oee = OEE_Prod_260521.objects.filter(produto=produto)
-
-    maquina = request.GET.get("maquina")
-
-    operacao = request.GET.get("operacao")
 
     base_maquinas = base_oee
 
     if operacao:
         base_maquinas = base_maquinas.filter(operacao=int(operacao))
 
-    maquinas = list(base_maquinas.exclude(maquina__isnull=True).values_list("maquina",flat=True).distinct().order_by("maquina"))
+    maquinas = list(
+        base_maquinas
+        .exclude(maquina__isnull=True)
+        .values_list("maquina", flat=True)
+        .distinct()
+        .order_by("maquina")
+    )
 
     if maquina and int(maquina) not in maquinas:
         maquinas.append(int(maquina))
@@ -174,81 +232,179 @@ def grafico_3(request):
     if maquina:
         base_operacoes = base_operacoes.filter(maquina=int(maquina))
 
-    operacoes = list(base_operacoes.exclude(operacao__isnull=True).values_list("operacao",flat=True).distinct().order_by("operacao"))
+    operacoes = list(
+        base_operacoes
+        .exclude(operacao__isnull=True)
+        .values_list("operacao", flat=True)
+        .distinct()
+        .order_by("operacao")
+    )
 
     if operacao and int(operacao) not in operacoes:
         operacoes.append(int(operacao))
         operacoes.sort()
 
-    if not maquina or not operacao:
+    if not maquina or not operacao or not modelo:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"operacoes": operacoes,"produto": produto,"maquina": maquina,"operacao": operacao,"data_inicio": data_inicio,"quantidade": quantidade})
+        return render(
+            request,
+            "colab/grafico_3.html",
+            {
+                "grafico": None,
+                "produtos": produtos,
+                "maquinas": maquinas,
+                "operacoes": operacoes,
+                "produto": produto,
+                "maquina": maquina,
+                "operacao": operacao,
+                "modelo": modelo,
+                "data_inicio": data_inicio,
+                "quantidade": quantidade
+            }
+        )
 
     maquina = int(maquina)
-
     operacao = int(operacao)
 
     if not data_inicio or not quantidade:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"operacoes": operacoes,"produto": produto,"maquina": maquina,"operacao": operacao,"data_inicio": data_inicio,"quantidade": quantidade})
-
-    if not data_inicio or not quantidade:
-
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade})
+        return render(
+            request,
+            "colab/grafico_3.html",
+            {
+                "grafico": None,
+                "produtos": produtos,
+                "maquinas": maquinas,
+                "operacoes": operacoes,
+                "produto": produto,
+                "maquina": maquina,
+                "operacao": operacao,
+                "modelo": modelo,
+                "data_inicio": data_inicio,
+                "quantidade": quantidade
+            }
+        )
 
     quantidade = int(quantidade)
 
-    registro_produto = (PRODUTOS_260610.objects.filter(peca=produto,pecas_hora__isnull=False).first())
+    registro_produto = (
+        PRODUTOS_260610.objects
+        .filter(peca=produto, pecas_hora__isnull=False)
+        .first()
+    )
 
     if not registro_produto:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade})
+        return render(
+            request,
+            "colab/grafico_3.html",
+            {
+                "grafico": None,
+                "produtos": produtos,
+                "maquinas": maquinas,
+                "produto": produto,
+                "maquina": maquina,
+                "modelo": modelo,
+                "data_inicio": data_inicio,
+                "quantidade": quantidade
+            }
+        )
 
     pecas_hora = float(registro_produto.pecas_hora)
 
-    historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,operacao=operacao,oee__isnull=False).order_by('inicio'))
+    historico_oee = (
+        OEE_Prod_260521.objects
+        .filter(
+            produto=produto,
+            maquina=maquina,
+            operacao=operacao,
+            oee__isnull=False
+        )
+        .order_by('inicio')
+    )
 
     df_oee = pd.DataFrame(list(historico_oee.values('oee')))
 
     if df_oee.empty:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": "Não existem dados de OEE para este produto e máquina."})
+        return render(
+            request,
+            "colab/grafico_3.html",
+            {
+                "grafico": None,
+                "produtos": produtos,
+                "maquinas": maquinas,
+                "operacoes": operacoes,
+                "produto": produto,
+                "maquina": maquina,
+                "operacao": operacao,
+                "modelo": modelo,
+                "data_inicio": data_inicio,
+                "quantidade": quantidade,
+                "mensagem": "Não existem dados de OEE para este produto e máquina."
+            }
+        )
 
-    if len(df_oee) == 1:
+    serie_oee = df_oee["oee"].astype(float)
 
-        oee_previsto = float(df_oee["oee"].iloc[0])
+    # =========================
+    # MODELOS
+    # =========================
+
+    if len(serie_oee) == 1:
+        oee_previsto = float(serie_oee.iloc[0])
 
     else:
 
-        X = np.arange(len(df_oee)).reshape(-1, 1)
+        X = np.arange(len(serie_oee)).reshape(-1, 1)
+        y = serie_oee.values.reshape(-1, 1)
 
-        y = (df_oee["oee"].astype(float))
+        if modelo == "arima":
 
-        modelo = LinearRegression()
+            oee_previsto = prever_arima_simples(serie_oee.values)
 
-        modelo.fit(X,y)
+        elif modelo == "svr":
 
-        oee_previsto = modelo.predict([[len(df_oee)]])[0]
+            scaler_x = StandardScaler()
+            scaler_y = StandardScaler()
+
+            X_scaled = scaler_x.fit_transform(X)
+            y_scaled = scaler_y.fit_transform(y).ravel()
+
+            svr = SVR(kernel="rbf", C=100, gamma=0.1, epsilon=0.01)
+            svr.fit(X_scaled, y_scaled)
+
+            pred = svr.predict(scaler_x.transform([[len(serie_oee)]]))
+            oee_previsto = scaler_y.inverse_transform([pred])[0][0]
+
+        else:
+
+            regressao = LinearRegression()
+            regressao.fit(X, serie_oee)
+
+            oee_previsto = regressao.predict([[len(serie_oee)]])[0]
 
     inicio = pd.to_datetime(data_inicio)
 
-    tempo_ideal_horas = (quantidade / pecas_hora)
+    tempo_ideal_horas = quantidade / pecas_hora
 
-    tempo_real_horas = (tempo_ideal_horas / (oee_previsto / 100))
+    tempo_real_horas = tempo_ideal_horas / (oee_previsto / 100)
 
-    fim_previsto = inicio + pd.to_timedelta(tempo_real_horas,unit='h')
+    fim_previsto = inicio + pd.to_timedelta(tempo_real_horas, unit='h')
 
     fig, ax = plt.subplots(figsize=(15, 4))
 
-    ax.plot([inicio, fim_previsto],[0, 0],linewidth=12)
+    ax.plot([inicio, fim_previsto], [0, 0], linewidth=12)
+    ax.scatter(inicio, 0, s=350)
+    ax.scatter(fim_previsto, 0, s=350)
 
-    ax.scatter(inicio,0,s=350)
+    ax.text(inicio, 0.05,
+            'INÍCIO\n' + inicio.strftime('%d/%m/%Y %H:%M'),
+            fontsize=11)
 
-    ax.scatter(fim_previsto,0,s=350)
-
-    ax.text(inicio,0.05,'INÍCIO\n' + inicio.strftime('%d/%m/%Y %H:%M'),fontsize=11)
-
-    ax.text(fim_previsto,0.05,'PREVISÃO FINAL\n' +fim_previsto.strftime('%d/%m/%Y %H:%M'),fontsize=11,ha='right')
+    ax.text(fim_previsto, 0.05,
+            'PREVISÃO FINAL\n' + fim_previsto.strftime('%d/%m/%Y %H:%M'),
+            fontsize=11, ha='right')
 
     meio = inicio + ((fim_previsto - inicio) / 2)
 
@@ -256,36 +412,31 @@ def grafico_3(request):
         f'Produto: {produto}\n'
         f'Máquina: {maquina}\n'
         f'Operação: {operacao}\n'
+        f'Modelo: {modelo.upper()}\n'
         f'Quantidade: {quantidade} peças\n'
         f'Peças/Hora: {pecas_hora:.2f}\n'
         f'OEE Previsto: {oee_previsto:.2f}%\n'
         f'Tempo Previsto: {tempo_real_horas:.2f} horas'
     )
 
-    ax.text(meio,-0.05,texto,fontsize=12,ha='center',bbox=dict(boxstyle='round',pad=0.5))
+    ax.text(meio, -0.05, texto,
+            fontsize=12, ha='center',
+            bbox=dict(boxstyle='round', pad=0.5))
 
     ax.set_yticks([])
-
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m %H:%M'))
-
     plt.xticks(rotation=20)
 
     plt.title('Previsão de Produção')
-
     plt.xlabel('Data')
-
     plt.grid(True)
 
     buffer = io.BytesIO()
-
     plt.tight_layout()
-
-    plt.savefig(buffer,format='png')
-
+    plt.savefig(buffer, format='png')
     plt.close()
 
     buffer.seek(0)
-
     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
     return render(
@@ -296,30 +447,441 @@ def grafico_3(request):
             "produto": produto,
             "maquina": maquina,
             "operacao": operacao,
+            "modelo": modelo,
             "produtos": produtos,
             "maquinas": maquinas,
             "operacoes": operacoes,
-            "pecas_hora": round(
-                float(pecas_hora),
-                2
-            ),
-            "oee_previsto": round(
-                float(oee_previsto),
-                2
-            ),
-            "tempo_ideal": round(
-                float(tempo_ideal_horas),
-                2
-            ),
-            "tempo_real": round(
-                float(tempo_real_horas),
-                2
-            ),
+            "pecas_hora": round(pecas_hora, 2),
+            "oee_previsto": round(oee_previsto, 2),
+            "tempo_ideal": round(tempo_ideal_horas, 2),
+            "tempo_real": round(tempo_real_horas, 2),
             "fim_previsto": fim_previsto,
             "data_inicio": data_inicio,
             "quantidade": quantidade
         }
     )
+
+
+
+
+
+# @login_required
+# def grafico_3(request):
+
+#     produtos = (
+#         PRODUTOS_260610.objects
+#         .exclude(peca__isnull=True)
+#         .values_list('peca', flat=True)
+#         .distinct()
+#         .order_by('peca')
+#     )
+
+#     produto = request.GET.get("produto")
+
+#     maquina = request.GET.get("maquina")
+
+#     operacao = request.GET.get("operacao")
+
+#     data_inicio = request.GET.get("data_inicio", "")
+
+#     quantidade = request.GET.get("quantidade", "")
+
+#     modelo = request.GET.get("modelo", "")
+
+#     if not produto:
+
+#         return render(
+#             request,
+#             "colab/grafico_3.html",
+#             {
+#                 "grafico": None,
+#                 "produtos": produtos,
+#                 "maquinas": [],
+#                 "operacoes": [],
+#                 "produto": None,
+#                 "maquina": None,
+#                 "operacao": None,
+#                 "modelo": modelo,
+#                 "data_inicio": "",
+#                 "quantidade": ""
+#             }
+#         )
+
+#     produto = int(produto)
+
+#     base_oee = OEE_Prod_260521.objects.filter(
+#         produto=produto
+#     )
+
+#     base_maquinas = base_oee
+
+#     if operacao:
+#         base_maquinas = base_maquinas.filter(
+#             operacao=int(operacao)
+#         )
+
+#     maquinas = list(
+#         base_maquinas
+#         .exclude(maquina__isnull=True)
+#         .values_list(
+#             "maquina",
+#             flat=True
+#         )
+#         .distinct()
+#         .order_by("maquina")
+#     )
+
+#     if maquina and int(maquina) not in maquinas:
+
+#         maquinas.append(int(maquina))
+
+#         maquinas.sort()
+
+#     base_operacoes = base_oee
+
+#     if maquina:
+
+#         base_operacoes = base_operacoes.filter(
+#             maquina=int(maquina)
+#         )
+
+#     operacoes = list(
+#         base_operacoes
+#         .exclude(operacao__isnull=True)
+#         .values_list(
+#             "operacao",
+#             flat=True
+#         )
+#         .distinct()
+#         .order_by("operacao")
+#     )
+
+#     if operacao and int(operacao) not in operacoes:
+
+#         operacoes.append(int(operacao))
+
+#         operacoes.sort()
+
+#     if not maquina or not operacao or not modelo:
+
+#         return render(
+#             request,
+#             "colab/grafico_3.html",
+#             {
+#                 "grafico": None,
+#                 "produtos": produtos,
+#                 "maquinas": maquinas,
+#                 "operacoes": operacoes,
+#                 "produto": produto,
+#                 "maquina": maquina,
+#                 "operacao": operacao,
+#                 "modelo": modelo,
+#                 "data_inicio": data_inicio,
+#                 "quantidade": quantidade
+#             }
+#         )
+
+#     maquina = int(maquina)
+
+#     operacao = int(operacao)
+
+#     if not data_inicio or not quantidade:
+
+#         return render(
+#             request,
+#             "colab/grafico_3.html",
+#             {
+#                 "grafico": None,
+#                 "produtos": produtos,
+#                 "maquinas": maquinas,
+#                 "operacoes": operacoes,
+#                 "produto": produto,
+#                 "maquina": maquina,
+#                 "operacao": operacao,
+#                 "modelo": modelo,
+#                 "data_inicio": data_inicio,
+#                 "quantidade": quantidade
+#             }
+#         )
+
+#     quantidade = int(quantidade)
+
+#     registro_produto = (
+#         PRODUTOS_260610.objects
+#         .filter(
+#             peca=produto,
+#             pecas_hora__isnull=False
+#         )
+#         .first()
+#     )
+
+#     if not registro_produto:
+
+#         return render(
+#             request,
+#             "colab/grafico_3.html",
+#             {
+#                 "grafico": None,
+#                 "produtos": produtos,
+#                 "maquinas": maquinas,
+#                 "produto": produto,
+#                 "maquina": maquina,
+#                 "modelo": modelo,
+#                 "data_inicio": data_inicio,
+#                 "quantidade": quantidade
+#             }
+#         )
+
+#     pecas_hora = float(
+#         registro_produto.pecas_hora
+#     )
+
+#     historico_oee = (
+#         OEE_Prod_260521.objects
+#         .filter(
+#             produto=produto,
+#             maquina=maquina,
+#             operacao=operacao,
+#             oee__isnull=False
+#         )
+#         .order_by('inicio')
+#     )
+
+#     df_oee = pd.DataFrame(
+#         list(
+#             historico_oee.values('oee')
+#         )
+#     )
+
+#     if df_oee.empty:
+
+#         return render(
+#             request,
+#             "colab/grafico_3.html",
+#             {
+#                 "grafico": None,
+#                 "produtos": produtos,
+#                 "maquinas": maquinas,
+#                 "operacoes": operacoes,
+#                 "produto": produto,
+#                 "maquina": maquina,
+#                 "operacao": operacao,
+#                 "modelo": modelo,
+#                 "data_inicio": data_inicio,
+#                 "quantidade": quantidade,
+#                 "mensagem":
+#                 "Não existem dados de OEE para este produto e máquina."
+#             }
+#         )
+
+#     serie_oee = df_oee["oee"].astype(float)
+
+#     if len(serie_oee) == 1:
+
+#         oee_previsto = float(
+#             serie_oee.iloc[0]
+#         )
+
+#     else:
+
+#         if modelo == "arima":
+
+#             oee_previsto = prever_arima_simples(
+#                 serie_oee.values
+#             )
+
+#         else:
+
+#             X = np.arange(
+#                 len(serie_oee)
+#             ).reshape(-1, 1)
+
+#             y = serie_oee
+
+#             regressao = LinearRegression()
+
+#             regressao.fit(X, y)
+
+#             oee_previsto = regressao.predict(
+#                 [[len(serie_oee)]]
+#             )[0]
+
+#     if oee_previsto < 1:
+#         oee_previsto = 1
+
+#     if oee_previsto > 100:
+#         oee_previsto = 100
+
+#     inicio = pd.to_datetime(data_inicio)
+
+#     tempo_ideal_horas = (
+#         quantidade / pecas_hora
+#     )
+
+#     tempo_real_horas = (
+#         tempo_ideal_horas /
+#         (oee_previsto / 100)
+#     )
+
+#     fim_previsto = (
+#         inicio +
+#         pd.to_timedelta(
+#             tempo_real_horas,
+#             unit='h'
+#         )
+#     )
+
+#     fig, ax = plt.subplots(
+#         figsize=(15, 4)
+#     )
+
+#     ax.plot(
+#         [inicio, fim_previsto],
+#         [0, 0],
+#         linewidth=12
+#     )
+
+#     ax.scatter(
+#         inicio,
+#         0,
+#         s=350
+#     )
+
+#     ax.scatter(
+#         fim_previsto,
+#         0,
+#         s=350
+#     )
+
+#     ax.text(
+#         inicio,
+#         0.05,
+#         'INÍCIO\n' +
+#         inicio.strftime('%d/%m/%Y %H:%M'),
+#         fontsize=11
+#     )
+
+#     ax.text(
+#         fim_previsto,
+#         0.05,
+#         'PREVISÃO FINAL\n' +
+#         fim_previsto.strftime('%d/%m/%Y %H:%M'),
+#         fontsize=11,
+#         ha='right'
+#     )
+
+#     meio = inicio + (
+#         (fim_previsto - inicio) / 2
+#     )
+
+#     texto = (
+#         f'Produto: {produto}\n'
+#         f'Máquina: {maquina}\n'
+#         f'Operação: {operacao}\n'
+#         f'Modelo: {modelo.upper()}\n'
+#         f'Quantidade: {quantidade} peças\n'
+#         f'Peças/Hora: {pecas_hora:.2f}\n'
+#         f'OEE Previsto: {oee_previsto:.2f}%\n'
+#         f'Tempo Previsto: {tempo_real_horas:.2f} horas'
+#     )
+
+#     ax.text(
+#         meio,
+#         -0.05,
+#         texto,
+#         fontsize=12,
+#         ha='center',
+#         bbox=dict(
+#             boxstyle='round',
+#             pad=0.5
+#         )
+#     )
+
+#     ax.set_yticks([])
+
+#     ax.xaxis.set_major_formatter(
+#         mdates.DateFormatter(
+#             '%d/%m %H:%M'
+#         )
+#     )
+
+#     plt.xticks(rotation=20)
+
+#     plt.title(
+#         'Previsão de Produção'
+#     )
+
+#     plt.xlabel('Data')
+
+#     plt.grid(True)
+
+#     buffer = io.BytesIO()
+
+#     plt.tight_layout()
+
+#     plt.savefig(
+#         buffer,
+#         format='png'
+#     )
+
+#     plt.close()
+
+#     buffer.seek(0)
+
+#     grafico_png = base64.b64encode(
+#         buffer.getvalue()
+#     ).decode()
+
+#     return render(
+#         request,
+#         "colab/grafico_3.html",
+#         {
+#             "grafico": grafico_png,
+#             "produto": produto,
+#             "maquina": maquina,
+#             "operacao": operacao,
+#             "modelo": modelo,
+#             "produtos": produtos,
+#             "maquinas": maquinas,
+#             "operacoes": operacoes,
+#             "pecas_hora": round(
+#                 pecas_hora,
+#                 2
+#             ),
+#             "oee_previsto": round(
+#                 oee_previsto,
+#                 2
+#             ),
+#             "tempo_ideal": round(
+#                 tempo_ideal_horas,
+#                 2
+#             ),
+#             "tempo_real": round(
+#                 tempo_real_horas,
+#                 2
+#             ),
+#             "fim_previsto": fim_previsto,
+#             "data_inicio": data_inicio,
+#             "quantidade": quantidade
+#         }
+#     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -337,31 +899,57 @@ def grafico_3(request):
 
 #     produto = request.GET.get("produto")
 
+#     operacao = request.GET.get("operacao")
+
 #     data_inicio = request.GET.get("data_inicio", "")
 
 #     quantidade = request.GET.get("quantidade", "")
 
 #     if not produto:
 
-#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": None,"maquina": None,"data_inicio": "","quantidade": ""})
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"operacoes": [],"produto": None,"maquina": None,"operacao": None,"data_inicio": "","quantidade": ""})
 
 #     produto = int(produto)
 
-#     maquinas = (OEE_Prod_260521.objects.filter(produto=produto).exclude(maquina__isnull=True).values_list('maquina', flat=True).distinct().order_by('maquina'))
-
-#     maquinas = list(maquinas)
-
-#     if not maquinas:
-
-#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": "Este produto não possui histórico de máquinas."})
+#     base_oee = OEE_Prod_260521.objects.filter(produto=produto)
 
 #     maquina = request.GET.get("maquina")
 
-#     if not maquina:
+#     operacao = request.GET.get("operacao")
 
-#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade})
+#     base_maquinas = base_oee
+
+#     if operacao:
+#         base_maquinas = base_maquinas.filter(operacao=int(operacao))
+
+#     maquinas = list(base_maquinas.exclude(maquina__isnull=True).values_list("maquina",flat=True).distinct().order_by("maquina"))
+
+#     if maquina and int(maquina) not in maquinas:
+#         maquinas.append(int(maquina))
+#         maquinas.sort()
+
+#     base_operacoes = base_oee
+
+#     if maquina:
+#         base_operacoes = base_operacoes.filter(maquina=int(maquina))
+
+#     operacoes = list(base_operacoes.exclude(operacao__isnull=True).values_list("operacao",flat=True).distinct().order_by("operacao"))
+
+#     if operacao and int(operacao) not in operacoes:
+#         operacoes.append(int(operacao))
+#         operacoes.sort()
+
+#     if not maquina or not operacao:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"operacoes": operacoes,"produto": produto,"maquina": maquina,"operacao": operacao,"data_inicio": data_inicio,"quantidade": quantidade})
 
 #     maquina = int(maquina)
+
+#     operacao = int(operacao)
+
+#     if not data_inicio or not quantidade:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"operacoes": operacoes,"produto": produto,"maquina": maquina,"operacao": operacao,"data_inicio": data_inicio,"quantidade": quantidade})
 
 #     if not data_inicio or not quantidade:
 
@@ -377,7 +965,7 @@ def grafico_3(request):
 
 #     pecas_hora = float(registro_produto.pecas_hora)
 
-#     historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,oee__isnull=False).order_by('inicio'))
+#     historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,operacao=operacao,oee__isnull=False).order_by('inicio'))
 
 #     df_oee = pd.DataFrame(list(historico_oee.values('oee')))
 
@@ -426,6 +1014,7 @@ def grafico_3(request):
 #     texto = (
 #         f'Produto: {produto}\n'
 #         f'Máquina: {maquina}\n'
+#         f'Operação: {operacao}\n'
 #         f'Quantidade: {quantidade} peças\n'
 #         f'Peças/Hora: {pecas_hora:.2f}\n'
 #         f'OEE Previsto: {oee_previsto:.2f}%\n'
@@ -465,8 +1054,10 @@ def grafico_3(request):
 #             "grafico": grafico_png,
 #             "produto": produto,
 #             "maquina": maquina,
+#             "operacao": operacao,
 #             "produtos": produtos,
 #             "maquinas": maquinas,
+#             "operacoes": operacoes,
 #             "pecas_hora": round(
 #                 float(pecas_hora),
 #                 2

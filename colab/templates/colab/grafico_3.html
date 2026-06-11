@@ -3,7 +3,6 @@
 {% block content %}
 
 <style>
-
 .filtros {
     display: flex;
     flex-wrap: wrap;
@@ -22,7 +21,6 @@
 }
 
 @media (max-width: 768px) {
-
     .filtros {
         flex-direction: column;
         align-items: stretch;
@@ -34,127 +32,91 @@
         width: 100%;
     }
 }
-
 </style>
 
 <h2>Previsão de Produção</h2>
 
-<form method="get"
-      class="filtros">
+<form method="get" class="filtros">
 
-    <label>
-        <strong>Produto:</strong>
-    </label>
+    <label><strong>Modelo:</strong></label>
+    <select name="modelo" onchange="this.form.submit()">
 
-    <select name="produto" onchange="this.form.submit()">
-
-        <option value="">
-            Selecione um Produto
+        <option value="" {% if not modelo %}selected{% endif %}>
+            Selecione um Modelo
         </option>
 
-        {% for p in produtos %}
-
-        <option value="{{ p }}"
-        {% if p == produto %}
-        selected
-        {% endif %}>
-            {{ p }}
+        <option value="linear" {% if modelo == "linear" %}selected{% endif %}>
+            Regressão Linear
         </option>
 
-        {% endfor %}
+        <option value="arima" {% if modelo == "arima" %}selected{% endif %}>
+            ARIMA
+        </option>
+
+        <option value="svr" {% if modelo == "svr" %}selected{% endif %}>
+            SVR
+        </option>
 
     </select>
 
-    <label style="margin-left:20px;">
-        <strong>Máquina:</strong>
-    </label>
-
-    <select name="maquina" onchange="this.form.submit()">
-
-        <option value="">
-            Selecione uma Máquina
-        </option>
-
-        {% for m in maquinas %}
-
-        <option value="{{ m }}"
-        {% if m|stringformat:"s" == maquina|stringformat:"s" %}
-        selected
-        {% endif %}>
-            {{ m }}
-        </option>
-
-        {% endfor %}
-
-    </select>
-
-    <label style="margin-left:20px;">
-        <strong>Operação:</strong>
-    </label>
-
+    <label><strong>Operação:</strong></label>
     <select name="operacao" onchange="this.form.submit()">
-        <option value="">
-            Selecione uma Operação
-        </option>
-
+        <option value="">Selecione uma Operação</option>
         {% for o in operacoes %}
-
-        <option value="{{ o }}"
-        {% if o|stringformat:"s" == operacao|stringformat:"s" %}
-        selected
-        {% endif %}>
+        <option value="{{ o }}" {% if o|stringformat:"s" == operacao|stringformat:"s" %}selected{% endif %}>
             {{ o }}
         </option>
-
         {% endfor %}
-
     </select>
-        
-    <label style="margin-left:20px;">
-        <strong>Data Inicial:</strong>
-    </label>
 
+    <label><strong>Produto:</strong></label>
+    <select name="produto" onchange="this.form.submit()">
+        <option value="">Selecione um Produto</option>
+        {% for p in produtos %}
+        <option value="{{ p }}" {% if p == produto %}selected{% endif %}>
+            {{ p }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <label><strong>Máquina:</strong></label>
+    <select name="maquina" onchange="this.form.submit()">
+        <option value="">Selecione uma Máquina</option>
+        {% for m in maquinas %}
+        <option value="{{ m }}" {% if m|stringformat:"s" == maquina|stringformat:"s" %}selected{% endif %}>
+            {{ m }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <label><strong>Data Inicial:</strong></label>
     <input type="datetime-local"
            name="data_inicio"
            value="{{ data_inicio }}"
            onchange="this.form.submit()">
 
-    <label style="margin-left:20px;">
-        <strong>Quantidade:</strong>
-    </label>
-
+    <label><strong>Quantidade:</strong></label>
     <input type="number"
            name="quantidade"
            value="{{ quantidade }}"
            min="1">
 
-    <button type="submit">
-        Simular
-    </button>
+    <button type="submit">Simular</button>
 
 </form>
 
 {% if mensagem %}
-<p>
-    <strong>{{ mensagem }}</strong>
-</p>
+<p><strong>{{ mensagem }}</strong></p>
 {% endif %}
 
 {% if grafico %}
 
 <p><strong>Peças_Hora:</strong> {{ pecas_hora }}</p>
-
 <p><strong>Previsão do OEE:</strong> {{ oee_previsto }}%</p>
-
+<p><strong>Modelo:</strong> {{ modelo|upper }}</p>
 <p><strong>Duração Padrão:</strong> {{ tempo_ideal }} horas</p>
-
 <p><strong>Duração Prevista:</strong> {{ tempo_real }} horas</p>
-
-<p><strong>Previsão da data final:</strong> {{ fim_previsto }}</p>
-
-{% endif %}
-
-{% if grafico %}
+<p><strong>Previsão final:</strong> {{ fim_previsto }}</p>
 
 <img src="data:image/png;base64,{{ grafico }}"
      style="width:90%; border:1px solid #ccc; margin-top:20px;">

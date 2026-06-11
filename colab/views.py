@@ -9,6 +9,7 @@ import numpy as np
 from django.db import connections
 from colab.models import OEE_Prod_260521
 from colab.models import ITENS_260521
+from colab.models import PRODUTOS_260610
 import matplotlib.dates as mdates
 from sklearn.linear_model import LinearRegression
 

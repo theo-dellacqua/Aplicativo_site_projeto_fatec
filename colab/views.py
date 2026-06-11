@@ -132,10 +132,11 @@ def grafico_2(request):
 
 
 
+
 @login_required
 def grafico_3(request):
 
-    produtos = (ITENS_260521.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
+    produtos = (PRODUTOS_260610.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
 
     produto = request.GET.get("produto")
 
@@ -171,7 +172,7 @@ def grafico_3(request):
 
     quantidade = int(quantidade)
 
-    registro_produto = (ITENS_260521.objects.filter(peca=produto,pecas_hora__isnull=False).first())
+    registro_produto = (PRODUTOS_260610.objects.filter(peca=produto,pecas_hora__isnull=False).first())
 
     if not registro_produto:
 
@@ -299,36 +300,82 @@ def grafico_3(request):
 #
 
 
-
 # @login_required
 # def grafico_3(request):
 
-#     queryset = (ITENS_260521.objects.exclude(pecas_hora__isnull=True).exclude(inicio__isnull=True))
+#     produtos = (ITENS_260521.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
 
-#     dados = list(queryset.values('inicio', 'pecas_hora'))
+#     produto = request.GET.get("produto")
 
-#     df = pd.DataFrame(dados)
+#     data_inicio = request.GET.get("data_inicio", "")
 
-#     if df.empty:
-#         return render(request, "colab/grafico_3.html", {"grafico": None})
+#     quantidade = request.GET.get("quantidade", "")
 
-#     df["inicio"] = pd.to_datetime(df["inicio"])
-#     df["pecas_hora"] = pd.to_numeric(df["pecas_hora"], errors="coerce")
+#     if not produto:
 
-#     df = df.dropna(subset=["inicio", "pecas_hora"])
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": None,"maquina": None,"data_inicio": "","quantidade": ""})
 
-#     media_pecas_hora = df["pecas_hora"].mean()
+#     produto = int(produto)
 
-#     data_inicio = request.GET.get("data_inicio", "2026-05-21T10:59")
-#     quantidade = int(request.GET.get("quantidade", 20000))
+#     maquinas = (OEE_Prod_260521.objects.filter(produto=produto).exclude(maquina__isnull=True).values_list('maquina', flat=True).distinct().order_by('maquina'))
+
+#     maquinas = list(maquinas)
+
+#     if not maquinas:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": "Este produto não possui histórico de máquinas."})
+
+#     maquina = request.GET.get("maquina")
+
+#     if not maquina:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade})
+
+#     maquina = int(maquina)
+
+#     if not data_inicio or not quantidade:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade})
+
+#     quantidade = int(quantidade)
+
+#     registro_produto = (ITENS_260521.objects.filter(peca=produto,pecas_hora__isnull=False).first())
+
+#     if not registro_produto:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade})
+
+#     pecas_hora = float(registro_produto.pecas_hora)
+
+#     historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,oee__isnull=False).order_by('inicio'))
+
+#     df_oee = pd.DataFrame(list(historico_oee.values('oee')))
+
+#     if df_oee.empty:
+
+#         return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": maquina,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": "Não existem dados de OEE para este produto e máquina."})
+
+#     if len(df_oee) == 1:
+
+#         oee_previsto = float(df_oee["oee"].iloc[0])
+
+#     else:
+
+#         X = np.arange(len(df_oee)).reshape(-1, 1)
+
+#         y = (df_oee["oee"].astype(float))
+
+#         modelo = LinearRegression()
+
+#         modelo.fit(X,y)
+
+#         oee_previsto = modelo.predict([[len(df_oee)]])[0]
 
 #     inicio = pd.to_datetime(data_inicio)
 
-#     oee = 66.66
+#     tempo_ideal_horas = (quantidade / pecas_hora)
 
-#     tempo_ideal_horas = quantidade / media_pecas_hora
-
-#     tempo_real_horas = tempo_ideal_horas / (oee / 100)
+#     tempo_real_horas = (tempo_ideal_horas / (oee_previsto / 100))
 
 #     fim_previsto = inicio + pd.to_timedelta(tempo_real_horas,unit='h')
 
@@ -336,44 +383,86 @@ def grafico_3(request):
 
 #     ax.plot([inicio, fim_previsto],[0, 0],linewidth=12)
 
-#     ax.scatter(inicio, 0, s=350)
-#     ax.scatter(fim_previsto, 0, s=350)
+#     ax.scatter(inicio,0,s=350)
+
+#     ax.scatter(fim_previsto,0,s=350)
 
 #     ax.text(inicio,0.05,'INÍCIO\n' + inicio.strftime('%d/%m/%Y %H:%M'),fontsize=11)
 
-#     ax.text(fim_previsto,0.05,'PREVISÃO FINAL\n' + fim_previsto.strftime('%d/%m/%Y %H:%M'),fontsize=11,ha='right')
+#     ax.text(fim_previsto,0.05,'PREVISÃO FINAL\n' +fim_previsto.strftime('%d/%m/%Y %H:%M'),fontsize=11,ha='right')
 
 #     meio = inicio + ((fim_previsto - inicio) / 2)
 
 #     texto = (
+#         f'Produto: {produto}\n'
+#         f'Máquina: {maquina}\n'
 #         f'Quantidade: {quantidade} peças\n'
-#         f'Média Peças/Hora: {media_pecas_hora:.2f}\n'
-#         f'OEE: {oee}%\n'
+#         f'Peças/Hora: {pecas_hora:.2f}\n'
+#         f'OEE Previsto: {oee_previsto:.2f}%\n'
 #         f'Tempo Previsto: {tempo_real_horas:.2f} horas'
 #     )
 
-#     ax.text(meio,-0.05,texto,fontsize=12,ha='center',bbox=dict(boxstyle='round', pad=0.5))
+#     ax.text(meio,-0.05,texto,fontsize=12,ha='center',bbox=dict(boxstyle='round',pad=0.5))
 
 #     ax.set_yticks([])
 
 #     ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m %H:%M'))
 
 #     plt.xticks(rotation=20)
+
 #     plt.title('Previsão de Produção')
+
 #     plt.xlabel('Data')
+
 #     plt.grid(True)
 
 #     buffer = io.BytesIO()
 
 #     plt.tight_layout()
-#     plt.savefig(buffer, format='png')
+
+#     plt.savefig(buffer,format='png')
+
 #     plt.close()
 
 #     buffer.seek(0)
 
 #     grafico_png = base64.b64encode(buffer.getvalue()).decode()
 
-#     return render(request,"colab/grafico_3.html",{"grafico": grafico_png,"media_pecas_hora": round(float(media_pecas_hora), 2),"tempo_ideal": round(float(tempo_ideal_horas), 2),"tempo_real": round(float(tempo_real_horas), 2),"fim_previsto": fim_previsto,"data_inicio": data_inicio,"quantidade": quantidade})
+#     return render(
+#         request,
+#         "colab/grafico_3.html",
+#         {
+#             "grafico": grafico_png,
+#             "produto": produto,
+#             "maquina": maquina,
+#             "produtos": produtos,
+#             "maquinas": maquinas,
+#             "pecas_hora": round(
+#                 float(pecas_hora),
+#                 2
+#             ),
+#             "oee_previsto": round(
+#                 float(oee_previsto),
+#                 2
+#             ),
+#             "tempo_ideal": round(
+#                 float(tempo_ideal_horas),
+#                 2
+#             ),
+#             "tempo_real": round(
+#                 float(tempo_real_horas),
+#                 2
+#             ),
+#             "fim_previsto": fim_previsto,
+#             "data_inicio": data_inicio,
+#             "quantidade": quantidade
+#         }
+#     )
+
+
+
+
+
 
 
 

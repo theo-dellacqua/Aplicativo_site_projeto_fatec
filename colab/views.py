@@ -140,31 +140,57 @@ def grafico_3(request):
 
     produto = request.GET.get("produto")
 
+    operacao = request.GET.get("operacao")
+
     data_inicio = request.GET.get("data_inicio", "")
 
     quantidade = request.GET.get("quantidade", "")
 
     if not produto:
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": None,"maquina": None,"data_inicio": "","quantidade": ""})
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"operacoes": [],"produto": None,"maquina": None,"operacao": None,"data_inicio": "","quantidade": ""})
 
     produto = int(produto)
 
-    maquinas = (OEE_Prod_260521.objects.filter(produto=produto).exclude(maquina__isnull=True).values_list('maquina', flat=True).distinct().order_by('maquina'))
-
-    maquinas = list(maquinas)
-
-    if not maquinas:
-
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": [],"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade,"mensagem": "Este produto não possui histórico de máquinas."})
+    base_oee = OEE_Prod_260521.objects.filter(produto=produto)
 
     maquina = request.GET.get("maquina")
 
-    if not maquina:
+    operacao = request.GET.get("operacao")
 
-        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"produto": produto,"maquina": None,"data_inicio": data_inicio,"quantidade": quantidade})
+    base_maquinas = base_oee
+
+    if operacao:
+        base_maquinas = base_maquinas.filter(operacao=int(operacao))
+
+    maquinas = list(base_maquinas.exclude(maquina__isnull=True).values_list("maquina",flat=True).distinct().order_by("maquina"))
+
+    if maquina and int(maquina) not in maquinas:
+        maquinas.append(int(maquina))
+        maquinas.sort()
+
+    base_operacoes = base_oee
+
+    if maquina:
+        base_operacoes = base_operacoes.filter(maquina=int(maquina))
+
+    operacoes = list(base_operacoes.exclude(operacao__isnull=True).values_list("operacao",flat=True).distinct().order_by("operacao"))
+
+    if operacao and int(operacao) not in operacoes:
+        operacoes.append(int(operacao))
+        operacoes.sort()
+
+    if not maquina or not operacao:
+
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"operacoes": operacoes,"produto": produto,"maquina": maquina,"operacao": operacao,"data_inicio": data_inicio,"quantidade": quantidade})
 
     maquina = int(maquina)
+
+    operacao = int(operacao)
+
+    if not data_inicio or not quantidade:
+
+        return render(request,"colab/grafico_3.html",{"grafico": None,"produtos": produtos,"maquinas": maquinas,"operacoes": operacoes,"produto": produto,"maquina": maquina,"operacao": operacao,"data_inicio": data_inicio,"quantidade": quantidade})
 
     if not data_inicio or not quantidade:
 
@@ -180,7 +206,7 @@ def grafico_3(request):
 
     pecas_hora = float(registro_produto.pecas_hora)
 
-    historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,oee__isnull=False).order_by('inicio'))
+    historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,operacao=operacao,oee__isnull=False).order_by('inicio'))
 
     df_oee = pd.DataFrame(list(historico_oee.values('oee')))
 
@@ -229,6 +255,7 @@ def grafico_3(request):
     texto = (
         f'Produto: {produto}\n'
         f'Máquina: {maquina}\n'
+        f'Operação: {operacao}\n'
         f'Quantidade: {quantidade} peças\n'
         f'Peças/Hora: {pecas_hora:.2f}\n'
         f'OEE Previsto: {oee_previsto:.2f}%\n'
@@ -268,8 +295,10 @@ def grafico_3(request):
             "grafico": grafico_png,
             "produto": produto,
             "maquina": maquina,
+            "operacao": operacao,
             "produtos": produtos,
             "maquinas": maquinas,
+            "operacoes": operacoes,
             "pecas_hora": round(
                 float(pecas_hora),
                 2
@@ -300,10 +329,11 @@ def grafico_3(request):
 #
 
 
+
 # @login_required
 # def grafico_3(request):
 
-#     produtos = (ITENS_260521.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
+#     produtos = (PRODUTOS_260610.objects.exclude(peca__isnull=True).values_list('peca', flat=True).distinct().order_by('peca'))
 
 #     produto = request.GET.get("produto")
 
@@ -339,7 +369,7 @@ def grafico_3(request):
 
 #     quantidade = int(quantidade)
 
-#     registro_produto = (ITENS_260521.objects.filter(peca=produto,pecas_hora__isnull=False).first())
+#     registro_produto = (PRODUTOS_260610.objects.filter(peca=produto,pecas_hora__isnull=False).first())
 
 #     if not registro_produto:
 
@@ -458,6 +488,7 @@ def grafico_3(request):
 #             "quantidade": quantidade
 #         }
 #     )
+
 
 
 

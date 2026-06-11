@@ -78,7 +78,7 @@
         {% for m in maquinas %}
 
         <option value="{{ m }}"
-        {% if m == maquina %}
+        {% if m|stringformat:"s" == maquina|stringformat:"s" %}
         selected
         {% endif %}>
             {{ m }}
@@ -88,6 +88,28 @@
 
     </select>
 
+    <label style="margin-left:20px;">
+        <strong>Operação:</strong>
+    </label>
+
+    <select name="operacao" onchange="this.form.submit()">
+        <option value="">
+            Selecione uma Operação
+        </option>
+
+        {% for o in operacoes %}
+
+        <option value="{{ o }}"
+        {% if o|stringformat:"s" == operacao|stringformat:"s" %}
+        selected
+        {% endif %}>
+            {{ o }}
+        </option>
+
+        {% endfor %}
+
+    </select>
+        
     <label style="margin-left:20px;">
         <strong>Data Inicial:</strong>
     </label>

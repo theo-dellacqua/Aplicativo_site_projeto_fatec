@@ -57,3 +57,20 @@ class ITENS_260521(models.Model):
 
     def __str__(self):
         return f'{self.recid} {self.os} {self.maquina} {self.peca}'
+    
+
+
+class PRODUTOS_260610(models.Model):
+    peca = models.IntegerField(null=True)
+    operacao = models.IntegerField(null=True)
+    codigo = models.CharField(max_length=100, null=True)
+    cavidades = models.IntegerField(null=True)
+    pecas_hora = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True
+    )
+    molde = models.IntegerField(null=True)
+
+    def __str__(self):
+        return f'{self.peca} {self.operacao} {self.pecas_hora} {self.molde}'

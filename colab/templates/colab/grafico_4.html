@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filtros select,
+.filtros input {
+    min-width: 150px;
+}
+
+.filtros button {
+    min-width: 100px;
+}
+
+.resumo {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f8f8f8;
+}
+
+.resumo p {
+    margin: 4px 0;
+}
+
+.grafico-container {
+    margin-top: 20px;
+}
+
+.grafico-container img {
+    width: 100%;
+    border: 1px solid #ccc;
+}
+
+@media (max-width:768px) {
+
+    .filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtros select,
+    .filtros input,
+    .filtros button {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+<h2>Previsão de Produção por Sequência</h2>
+
+<form method="get" class="filtros">
+
+    <label>
+        <strong>Modelo:</strong>
+    </label>
+
+    <select name="modelo" onchange="this.form.submit()">
+
+        <option value=""
+            {% if not modelo %}
+                selected
+            {% endif %}
+        >
+            Selecione
+        </option>
+
+        <option value="linear"
+            {% if modelo == "linear" %}
+                selected
+            {% endif %}
+        >
+            Regressão Linear
+        </option>
+
+        <option value="arima"
+            {% if modelo == "arima" %}
+                selected
+            {% endif %}
+        >
+            ARIMA
+        </option>
+
+        <option value="svr"
+            {% if modelo == "svr" %}
+                selected
+            {% endif %}
+        >
+            SVR
+        </option>
+
+    </select>
+
+
+    <label>
+        <strong>Máquina:</strong>
+    </label>
+
+    <select name="maquina" onchange="this.form.submit()">
+
+        <option value="">
+            Selecione
+        </option>
+
+        {% for m in maquinas %}
+
+            <option value="{{ m }}"
+                {% if m|stringformat:"s" == maquina|stringformat:"s" %}
+                    selected
+                {% endif %}
+            >
+                {{ m }}
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+
+    <label>
+        <strong>Operação:</strong>
+    </label>
+
+    <select name="operacao" onchange="this.form.submit()">
+
+        <option value="">
+            Selecione
+        </option>
+
+        {% for o in operacoes %}
+
+            <option value="{{ o }}"
+                {% if o|stringformat:"s" == operacao|stringformat:"s" %}
+                    selected
+                {% endif %}
+            >
+                {{ o }}
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+
+    <label>
+        <strong>Produto:</strong>
+    </label>
+
+    <select name="produto">
+
+        <option value="">
+            Todos / Automático
+        </option>
+
+        {% for p in produtos %}
+
+            <option value="{{ p }}"
+                {% if p|stringformat:"s" == produto|stringformat:"s" %}
+                    selected
+                {% endif %}
+            >
+                {{ p }}
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+
+    <label>
+        <strong>Quantidade:</strong>
+    </label>
+
+    <input
+        type="number"
+        name="quantidade"
+        value="{{ quantidade }}"
+        min="1"
+        required
+    >
+
+    <button type="submit">
+        Simular
+    </button>
+
+</form>
+
+
+{% if mensagem %}
+
+<div class="alert alert-warning">
+    {{ mensagem }}
+</div>
+
+{% endif %}
+
+
+{% if grafico %}
+
+<div class="resumo">
+
+    <p>
+        <strong>Modelo:</strong>
+        {{ modelo|upper }}
+    </p>
+
+    <p>
+        <strong>Peças/Hora:</strong>
+        {{ pecas_hora }}
+    </p>
+
+    <p>
+        <strong>OEE Previsto:</strong>
+        {{ oee_previsto }}%
+    </p>
+
+    <p>
+        <strong>Máquina:</strong>
+        {{ maquina }}
+    </p>
+
+    <p>
+        <strong>Operação:</strong>
+        {{ operacao }}
+    </p>
+
+    {% if produto %}
+    <p>
+        <strong>Produto:</strong>
+        {{ produto }}
+    </p>
+    {% endif %}
+
+    <p>
+        <strong>Quantidade Simulada:</strong>
+        {{ quantidade }}
+    </p>
+
+    <p>
+        <strong>Previsão Final da Nova Sequência:</strong>
+        {{ fim_previsto|date:"d/m/Y H:i" }}
+    </p>
+
+</div>
+
+<div class="grafico-container">
+
+    <img
+        src="data:image/png;base64,{{ grafico }}"
+        alt="Gráfico de previsão"
+    >
+
+</div>
+
+{% endif %}
+
+{% endblock %}

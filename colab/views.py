@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 @login_required
 def grafico_1(request):
 
-    produtos = (OEE_Prod_260521.objects.values_list('produto', flat=True).distinct().order_by('produto'))
+    produtos = (OEE_Prod_260611.objects.values_list('produto', flat=True).distinct().order_by('produto'))
 
     produto_selecionado = request.GET.get("produto")
 
@@ -29,7 +29,7 @@ def grafico_1(request):
     else:
         produto_selecionado = produtos.first()
 
-    queryset = (OEE_Prod_260521.objects.filter(produto=produto_selecionado).order_by('-inicio')[:5])
+    queryset = (OEE_Prod_260611.objects.filter(produto=produto_selecionado).order_by('-inicio')[:5])
 
     dados = list(queryset.values('maquina','inicio','oee'))
 
@@ -84,7 +84,7 @@ def grafico_1(request):
 @login_required
 def grafico_2(request):
 
-    produtos = (OEE_Prod_260521.objects.values_list('produto', flat=True).distinct().order_by('produto'))
+    produtos = (OEE_Prod_260611.objects.values_list('produto', flat=True).distinct().order_by('produto'))
 
     produto_filtro = request.GET.get("produto")
 
@@ -93,7 +93,7 @@ def grafico_2(request):
     else:
         produto_filtro = produtos.first()
 
-    queryset = (OEE_Prod_260521.objects.filter(produto=produto_filtro))
+    queryset = (OEE_Prod_260611.objects.filter(produto=produto_filtro))
 
     dados = list(queryset.values('maquina','oee'))
 
@@ -204,7 +204,7 @@ def grafico_3(request):
 
     produto = int(produto)
 
-    base_oee = OEE_Prod_260521.objects.filter(produto=produto)
+    base_oee = OEE_Prod_260611.objects.filter(produto=produto)
 
     base_maquinas = base_oee
 
@@ -309,7 +309,7 @@ def grafico_3(request):
     pecas_hora = float(registro_produto.pecas_hora)
 
     historico_oee = (
-        OEE_Prod_260521.objects
+        OEE_Prod_260611.objects
         .filter(
             produto=produto,
             maquina=maquina,
@@ -505,7 +505,7 @@ def grafico_3(request):
 
 #     produto = int(produto)
 
-#     base_oee = OEE_Prod_260521.objects.filter(
+#     base_oee = OEE_Prod_260611.objects.filter(
 #         produto=produto
 #     )
 
@@ -633,7 +633,7 @@ def grafico_3(request):
 #     )
 
 #     historico_oee = (
-#         OEE_Prod_260521.objects
+#         OEE_Prod_260611.objects
 #         .filter(
 #             produto=produto,
 #             maquina=maquina,
@@ -907,7 +907,7 @@ def grafico_3(request):
 
 #     produto = int(produto)
 
-#     base_oee = OEE_Prod_260521.objects.filter(produto=produto)
+#     base_oee = OEE_Prod_260611.objects.filter(produto=produto)
 
 #     maquina = request.GET.get("maquina")
 
@@ -961,7 +961,7 @@ def grafico_3(request):
 
 #     pecas_hora = float(registro_produto.pecas_hora)
 
-#     historico_oee = (OEE_Prod_260521.objects.filter(produto=produto,maquina=maquina,operacao=operacao,oee__isnull=False).order_by('inicio'))
+#     historico_oee = (OEE_Prod_260611.objects.filter(produto=produto,maquina=maquina,operacao=operacao,oee__isnull=False).order_by('inicio'))
 
 #     df_oee = pd.DataFrame(list(historico_oee.values('oee')))
 

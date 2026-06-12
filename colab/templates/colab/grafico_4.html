@@ -3,7 +3,6 @@
 {% block content %}
 
 <style>
-
 .filtros {
     display: flex;
     flex-wrap: wrap;
@@ -44,7 +43,6 @@
 }
 
 @media (max-width:768px) {
-
     .filtros {
         flex-direction: column;
         align-items: stretch;
@@ -55,216 +53,108 @@
     .filtros button {
         width: 100%;
     }
-
 }
-
 </style>
 
 <h2>Previsão de Produção por Sequência</h2>
 
 <form method="get" class="filtros">
 
-    <label>
-        <strong>Modelo:</strong>
-    </label>
-
+    <!-- MODELO -->
+    <label><strong>Modelo:</strong></label>
     <select name="modelo" onchange="this.form.submit()">
-
-        <option value=""
-            {% if not modelo %}
-                selected
-            {% endif %}
-        >
-            Selecione
-        </option>
-
-        <option value="linear"
-            {% if modelo == "linear" %}
-                selected
-            {% endif %}
-        >
-            Regressão Linear
-        </option>
-
-        <option value="arima"
-            {% if modelo == "arima" %}
-                selected
-            {% endif %}
-        >
-            ARIMA
-        </option>
-
-        <option value="svr"
-            {% if modelo == "svr" %}
-                selected
-            {% endif %}
-        >
-            SVR
-        </option>
-
+        <option value="" {% if not modelo %}selected{% endif %}>Selecione</option>
+        <option value="linear" {% if modelo == "linear" %}selected{% endif %}>Regressão Linear</option>
+        <option value="arima" {% if modelo == "arima" %}selected{% endif %}>ARIMA</option>
+        <option value="svr" {% if modelo == "svr" %}selected{% endif %}>SVR</option>
     </select>
 
-
-    <label>
-        <strong>Máquina:</strong>
-    </label>
-
-    <select name="maquina" onchange="this.form.submit()">
-
-        <option value="">
-            Selecione
-        </option>
-
+    <!-- MÁQUINA -->
+    <label><strong>Máquina:</strong></label>
+    <select name="maquina" id="maquina" onchange="onMaquinaChange()">
+        <option value="">Selecione</option>
         {% for m in maquinas %}
-
             <option value="{{ m }}"
-                {% if m|stringformat:"s" == maquina|stringformat:"s" %}
-                    selected
-                {% endif %}
-            >
+                {% if m|stringformat:"s" == maquina|stringformat:"s" %}selected{% endif %}>
                 {{ m }}
             </option>
-
         {% endfor %}
-
     </select>
 
-
-    <label>
-        <strong>Operação:</strong>
-    </label>
-
-    <select name="operacao" onchange="this.form.submit()">
-
-        <option value="">
-            Selecione
-        </option>
-
+    <!-- OPERAÇÃO -->
+    <label><strong>Operação:</strong></label>
+    <select name="operacao" id="operacao" onchange="onOperacaoChange()">
+        <option value="">Selecione</option>
         {% for o in operacoes %}
-
             <option value="{{ o }}"
-                {% if o|stringformat:"s" == operacao|stringformat:"s" %}
-                    selected
-                {% endif %}
-            >
+                {% if o|stringformat:"s" == operacao|stringformat:"s" %}selected{% endif %}>
                 {{ o }}
             </option>
-
         {% endfor %}
-
     </select>
 
-
-    <label>
-        <strong>Produto:</strong>
-    </label>
-
-    <select name="produto">
-
-        <option value="">
-            Todos / Automático
-        </option>
-
+    <!-- PRODUTO -->
+    <label><strong>Produto:</strong></label>
+    <select name="produto" id="produto">
+        <option value="">Todos</option>
         {% for p in produtos %}
-
             <option value="{{ p }}"
-                {% if p|stringformat:"s" == produto|stringformat:"s" %}
-                    selected
-                {% endif %}
-            >
+                {% if p|stringformat:"s" == produto|stringformat:"s" %}selected{% endif %}>
                 {{ p }}
             </option>
-
         {% endfor %}
-
     </select>
 
+    <!-- QUANTIDADE -->
+    <label><strong>Quantidade:</strong></label>
+    <input type="number" name="quantidade" value="{{ quantidade }}" min="1" required>
 
-    <label>
-        <strong>Quantidade:</strong>
-    </label>
-
-    <input
-        type="number"
-        name="quantidade"
-        value="{{ quantidade }}"
-        min="1"
-        required
-    >
-
-    <button type="submit">
-        Simular
-    </button>
-
+    <button type="submit">Simular</button>
 </form>
 
-
 {% if mensagem %}
-
 <div class="alert alert-warning">
     {{ mensagem }}
 </div>
-
 {% endif %}
-
 
 {% if grafico %}
 
 <div class="resumo">
 
-    <p>
-        <strong>Modelo:</strong>
-        {{ modelo|upper }}
-    </p>
-
-    <p>
-        <strong>Peças/Hora:</strong>
-        {{ pecas_hora }}
-    </p>
-
-    <p>
-        <strong>OEE Previsto:</strong>
-        {{ oee_previsto }}%
-    </p>
-
-    <p>
-        <strong>Máquina:</strong>
-        {{ maquina }}
-    </p>
-
-    <p>
-        <strong>Operação:</strong>
-        {{ operacao }}
-    </p>
+    <p><strong>Modelo:</strong> {{ modelo|upper }}</p>
+    <p><strong>Peças/Hora:</strong> {{ pecas_hora }}</p>
+    <p><strong>OEE Previsto:</strong> {{ oee_previsto }}%</p>
+    <p><strong>Máquina:</strong> {{ maquina }}</p>
+    <p><strong>Operação:</strong> {{ operacao }}</p>
 
     {% if produto %}
-    <p>
-        <strong>Produto:</strong>
-        {{ produto }}
-    </p>
+        <p><strong>Produto:</strong> {{ produto }}</p>
     {% endif %}
 
-    <p>
-        <strong>Quantidade Simulada:</strong>
-        {{ quantidade }}
-    </p>
-
-    <p>
-        <strong>Previsão Final da Nova Sequência:</strong>
-        {{ fim_previsto|date:"d/m/Y H:i" }}
-    </p>
-
+    <p><strong>Quantidade Simulada:</strong> {{ quantidade }}</p>
+    <p><strong>Previsão Final da Nova Sequência:</strong> {{ fim_previsto|date:"d/m/Y H:i" }}</p>
 </div>
 
 <div class="grafico-container">
-
-    <img
-        src="data:image/png;base64,{{ grafico }}"
-        alt="Gráfico de previsão"
-    >
-
+    <img src="data:image/png;base64,{{ grafico }}" alt="Gráfico de previsão">
 </div>
 
 {% endif %}
+
+<script>
+function onMaquinaChange() {
+    // troca máquina → limpa operação e produto
+    document.getElementById("operacao").value = "";
+    document.getElementById("produto").value = "";
+    document.forms[0].submit();
+}
+
+function onOperacaoChange() {
+    // troca operação → limpa produto
+    document.getElementById("produto").value = "";
+    document.forms[0].submit();
+}
+</script>
 
 {% endblock %}

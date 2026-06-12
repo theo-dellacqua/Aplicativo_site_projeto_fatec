@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class OEE_Prod_260521(models.Model):
+class OEE_Prod_260611(models.Model):
     recid = models.IntegerField(primary_key=True)
     maquina = models.IntegerField(null=True)
     inicio = models.DateTimeField(null=True)
@@ -30,7 +30,7 @@ class OEE_Prod_260521(models.Model):
     
 
 
-class ITENS_260521(models.Model):
+class ITENS_260611(models.Model):
     recid = models.IntegerField(primary_key=True)
     os = models.BigIntegerField(null=True)
     maquina = models.IntegerField(null=True)

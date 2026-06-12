@@ -7,8 +7,8 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 from django.db import connections
-from colab.models import OEE_Prod_260521
-from colab.models import ITENS_260521
+from colab.models import OEE_Prod_260611
+from colab.models import ITENS_260611
 from colab.models import PRODUTOS_260610
 import matplotlib.dates as mdates
 from sklearn.linear_model import LinearRegression
@@ -162,10 +162,6 @@ def prever_arima_simples(serie):
     previsao = serie[-1] + previsao_diff
 
     return float(previsao)
-
-
-
-#
 
 
 

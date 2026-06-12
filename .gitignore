@@ -2,10 +2,10 @@ db.sqlite3
 .venv
 __pycache__
 .env
-OEE_Prod_260521.csv
-ITENS_260521.csv
+OEE_Prod_260611.csv
+ITENS_260611.csv
 PRODUTOS_260610.csv
-Importar_OEE_Prod_260521.py
-Importar_ITENS_260521.py
+Importar_OEE_Prod_260611.py
+Importar_ITENS_260611.py
 Importar_PRODUTOS_260610.py
 outros_arquivos/

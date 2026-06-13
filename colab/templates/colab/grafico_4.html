@@ -95,8 +95,8 @@
 
     <!-- PRODUTO -->
     <label><strong>Produto:</strong></label>
-    <select name="produto" id="produto">
-        <option value="">Todos</option>
+    <select name="produto" id="produto" required>
+        <option value="">Selecione</option>
         {% for p in produtos %}
             <option value="{{ p }}"
                 {% if p|stringformat:"s" == produto|stringformat:"s" %}selected{% endif %}>
@@ -125,15 +125,20 @@
     <p><strong>Modelo:</strong> {{ modelo|upper }}</p>
     <p><strong>Peças/Hora:</strong> {{ pecas_hora }}</p>
     <p><strong>OEE Previsto:</strong> {{ oee_previsto }}%</p>
+
     <p><strong>Máquina:</strong> {{ maquina }}</p>
     <p><strong>Operação:</strong> {{ operacao }}</p>
+    <p><strong>Produto:</strong> {{ produto }}</p>
+    <p><strong>Quantidade:</strong> {{ quantidade }}</p>
 
-    {% if produto %}
-        <p><strong>Produto:</strong> {{ produto }}</p>
-    {% endif %}
+    <hr>
 
-    <p><strong>Quantidade Simulada:</strong> {{ quantidade }}</p>
-    <p><strong>Previsão Final da Nova Sequência:</strong> {{ fim_previsto|date:"d/m/Y H:i" }}</p>
+    <p><strong>Duração Padrão:</strong> {{ duracao_padrao|floatformat:2 }} h</p>
+    <p><strong>Duração Prevista:</strong> {{ duracao_prevista|floatformat:2 }} h</p>
+    <p><strong>Previsão Início:</strong> {{ previsao_inicio|date:"d/m/Y H:i" }}</p>
+
+    <p><strong>Previsão Final:</strong> {{ fim_previsto|date:"d/m/Y H:i" }}</p>
+
 </div>
 
 <div class="grafico-container">
@@ -144,15 +149,11 @@
 
 <script>
 function onMaquinaChange() {
-    // troca máquina → limpa operação e produto
     document.getElementById("operacao").value = "";
-    document.getElementById("produto").value = "";
     document.forms[0].submit();
 }
 
 function onOperacaoChange() {
-    // troca operação → limpa produto
-    document.getElementById("produto").value = "";
     document.forms[0].submit();
 }
 </script>
